@@ -1,17 +1,14 @@
 import lightning as L
-from hackernews_app.flows.hacker_news_etl import HackerNewsETL
-
+from hackernews_app.flows import HackerNewsLiveStories
+import logging
 class HackerNewsApp(L.LightningFlow):
 
     def __init__(self):
         super().__init__()
-        self.hacker_news_etl = HackerNewsETL()
+        self.hacker_news_live_stories = HackerNewsLiveStories()
 
     def run(self):
-        print("Hello")
-        self.hacker_news_etl.run()
-        self._exit()
-
+        self.hacker_news_live_stories.run()
 
 if __name__ == "__main__":
     app = L.LightningApp(HackerNewsApp())
