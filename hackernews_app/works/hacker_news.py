@@ -28,15 +28,13 @@ class HackerNewsGetItem(L.LightningWork):
                 self.max_item = response.json()
             else:
                 return
-        logging.info(self)
         while True:
-            logging.info(self)
             response = client.get(constants.HACKERNEWS_ITEMS_ENDPOINT.format(id=self.max_item))
             data = response.json()
 
             if response.status_code != 200 or data is None:
-                print(self.max_item)
+                logging.info(f"Did not see anything. The last item retrieved: {self.max_item}")
                 return
-            logging.info(data)
+            logging.info(f"Found a new item: {data}")
             self.max_item += 1
             logging.info(f"The last item retrieved: {self.max_item}")
