@@ -1,18 +1,12 @@
-from typing import List
 import logging
-import pickle
-import time
-import json
 import lightning as L
 from typing import Callable
 import google
 from google.cloud import pubsub_v1
 from concurrent import futures
 
-from hackernews_app.api import RESTAPI, constants
-from hackernews_app.api.hackernews import HackerNewsAPI, constants
-
-from lightning.storage import Path
+from hackernews_app.api import RESTAPI
+from hackernews_app.api.hackernews import constants
 
 class HackerNewsGetItem(L.LightningWork):
     """Gets new stories.
@@ -38,9 +32,6 @@ class HackerNewsGetItem(L.LightningWork):
             response = client.get(constants.HACKERNEWS_MAX_ITEM_ENDPOINT)
             if response.status_code == 200:
                 self.max_item = response.json()
-
-                #TODO: Remove me using this for testing
-                self.max_item -= 10
 
         while True:
             response = client.get(constants.HACKERNEWS_ITEMS_ENDPOINT.format(id=self.max_item))
@@ -76,12 +67,13 @@ class HackerNewsGetItem(L.LightningWork):
 
             return callback
 
-        for message in self.data:
+        while len(self.data) > 0:
+            message = self.data.pop()
             message = str(message)
             future = publisher.publish(self.topic_name, message.encode("utf-8"))
             future.add_done_callback(get_callback(future, message))
             publish_futures.append(future)
-        self.data = []
+
         futures.wait(publish_futures, return_when=futures.ALL_COMPLETED)
 
 
@@ -128,7 +120,6 @@ class HackerNewsSubscriber(L.LightningWork):
             )
 
             for msg in response.received_messages:
-                print("Received message:", msg.message.data)
                 self.messages = [*self.messages, str(msg.message.data)]
 
             ack_ids = [msg.ack_id for msg in response.received_messages]
