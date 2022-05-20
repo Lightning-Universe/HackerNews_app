@@ -8,6 +8,20 @@ from concurrent import futures
 from hackernews_app.api import RESTAPI
 from hackernews_app.api.hackernews import constants
 
+class HackerNewsRequestAPI(L.LightningWork):
+
+
+    def __init__(self):
+        super().__init__()
+        self.base_url = constants.HACKERNEWS_BASEURL
+        self.response_data = {}
+
+    def run(self, path: str):
+        client = RESTAPI(self.base_url)
+        response = client.get(path)
+        self.response_data = response.json()
+
+
 class HackerNewsGetItem(L.LightningWork):
     """Gets new stories.
 
