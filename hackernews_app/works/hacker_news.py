@@ -42,9 +42,6 @@ class HackerNewsGetItem(L.LightningWork):
                 #TODO: Remove me using this for testing
                 self.max_item -= 10
 
-            else:
-                return self.on_after_run(self.data)
-
         while True:
             response = client.get(constants.HACKERNEWS_ITEMS_ENDPOINT.format(id=self.max_item))
             data = response.json()
@@ -53,7 +50,7 @@ class HackerNewsGetItem(L.LightningWork):
                 logging.info(f"Did not see anything. The last item retrieved: {self.max_item}")
                 self.publish()
                 return
-            self.data.append(str(response.content))
+            self.data = [*self.data, str(response.content)]
             logging.info(f"Found a new item: {data}")
             self.max_item += 1
             logging.info(f"The last item retrieved: {self.max_item}")
@@ -63,12 +60,10 @@ class HackerNewsGetItem(L.LightningWork):
 
         publisher = pubsub_v1.PublisherClient()
         publish_futures = []
-
         try:
             publisher.create_topic(name=self.topic_name)
-        except google.api_core.exceptions.AlreadyExists as error:
-            logging.error(error)
-
+        except google.api_core.exceptions.AlreadyExists as _message:
+            logging.info(_message)
         def get_callback(
                 publish_future: pubsub_v1.publisher.futures.Future, data: str
         ) -> Callable[[pubsub_v1.publisher.futures.Future], None]:
@@ -86,7 +81,60 @@ class HackerNewsGetItem(L.LightningWork):
             future = publisher.publish(self.topic_name, message.encode("utf-8"))
             future.add_done_callback(get_callback(future, message))
             publish_futures.append(future)
-
+        self.data = []
         futures.wait(publish_futures, return_when=futures.ALL_COMPLETED)
 
 
+
+class HackerNewsSubscriber(L.LightningWork):
+
+    def __init__(self, project_id, topic_name, subscription="hacker-news-items-subscription", *args, **kwargs):
+        super().__init__(self, *args, **kwargs)
+        self.project_id = project_id
+        self.topic_name = topic_name
+        self.subscription = subscription
+        self.subscription_name = f"projects/{project_id}/subscriptions/{subscription}"
+        self.messages = []
+
+
+    def run(self):
+        # print("Running Subscriber")
+        # def callback(message):
+        #     message.ack()
+        #
+        # with pubsub_v1.SubscriberClient() as subscriber:
+        #     try:
+        #         subscriber.create_subscription(
+        #             name=self.subscription_name, topic=self.topic_name)
+        #     except google.api_core.exceptions.AlreadyExists as _message:
+        #         logging.info(_message)
+        #     streaming_pull_future = subscriber.subscribe(self.subscription_name, callback=callback)
+        #
+        #     try:
+        #         # When `timeout` is not set, result() will block indefinitely,
+        #         # unless an exception is encountered first.
+        #         self.messages = streaming_pull_future.result(timeout=60)
+        #     except TimeoutError:
+        #         streaming_pull_future.cancel()
+
+        #TODO: look into why async subscriber doesn't work
+        with pubsub_v1.SubscriberClient() as subscriber:
+            subscription_path = subscriber.subscription_path(self.project_id, self.subscription)
+            response = subscriber.pull(
+                request={
+                    "subscription": subscription_path,
+                    "max_messages": 5,
+                }
+            )
+
+            for msg in response.received_messages:
+                print("Received message:", msg.message.data)
+                self.messages = [*self.messages, str(msg.message.data)]
+
+            ack_ids = [msg.ack_id for msg in response.received_messages]
+            subscriber.acknowledge(
+                request={
+                    "subscription": subscription_path,
+                    "ack_ids": ack_ids,
+                }
+            )
