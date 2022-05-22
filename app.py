@@ -7,16 +7,17 @@ class HackerNewsDataProcesses(L.LightningFlow):
     def __init__(self):
         super().__init__()
         self.hacker_news_live_stories = HackerNewsLiveStories(
+            topic="hacker-news-items",
+            location="US",
             project_id=LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS.project_id,
-            topic="hacker-news-items"
         )
         self.hacker_news_batch = HackerNewsHourly()
 
     def run(self):
-        self.hacker_news_live_stories.run()
+        self.hacker_news_live_stories.run(credentials=LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS)
         self.hacker_news_batch.run(
             location="US",
-            project=LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS.project_id,
+            project_id=LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS.project_id,
             credentials=LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS
         )
 

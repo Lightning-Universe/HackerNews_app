@@ -1,4 +1,5 @@
 import time
+import json
 import datetime as dt
 import logging
 import pickle
@@ -11,6 +12,8 @@ from lightning_gcp.bigquery import BigQueryWork
 
 logging.basicConfig(level=logging.INFO)
 
+
+
 class HackerNewsLiveStories(L.LightningFlow):
     """ This flow runs endlessly
 
@@ -20,10 +23,13 @@ class HackerNewsLiveStories(L.LightningFlow):
         self,
         project_id: str,
         topic: str,
+        location: str,
         time_interval: int = 5,
     ):
         super().__init__()
         self.time_interval = time_interval
+        self.project_id = project_id
+        self.location = location
         self.item_getter = HackerNewsGetItem(project_id, topic, run_once=False)
         self.subscriber = HackerNewsSubscriber(
             project_id=project_id,
@@ -31,21 +37,50 @@ class HackerNewsLiveStories(L.LightningFlow):
             subscription="hacker-news-items-subscription",
             run_once=False
         )
+        self.bq_inserter = BigQueryWork(run_once=False)
+        self.is_bq_inserting = False
 
-    def run(self):
+    def run(self, credentials):
 
-        if self.item_getter.data:
-            self.subscriber.run()
-        # The property of the work isn't changing
-        else:
+        if self.item_getter.has_succeeded and self.item_getter.data:
+            if self.is_bq_inserting is False:
+                print(self.item_getter.max_item)
+                print(self.is_bq_inserting)
+                self.is_bq_inserting = True
+                self.bq_inserter.run(
+                    query=None,
+                    project=self.project_id,
+                    location=self.location,
+                    credentials=credentials,
+                    json_rows=[
+                        {
+                            **json.loads(data),
+                            **{"created_at": dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}
+                        }
+                        for data in self.item_getter.data
+                    ],
+                    table="hacker_news.stories"
+                )
+                #self.subscriber.run()
+
+        if self.bq_inserter.has_succeeded:
+            self.is_bq_inserting = False
+            self.item_getter.data = []
+
+        if not self.item_getter.has_started:
             self.item_getter.run()
-        logging.info(f"getter data: {self.item_getter.data}")
 
-        logging.info(f"subscriber: {self.subscriber.messages}")
-        if self.item_getter.has_started:
-            return
+        print(f"getter data: {self.item_getter.data}")
+
+        if len(self.subscriber.messages) > 0:
+            print(f"subscriber: {self.subscriber.messages}")
+            self.on_after_run(credentials)
 
         time.sleep(self.time_interval)
+
+    def on_after_run(self, credentials):
+
+        self.subscriber.messages = []
 
 
 class LastGroupLoader(L.LightningWork):
@@ -74,7 +109,7 @@ class HackerNewsHourly(L.LightningFlow):
         self.to_insert = True
 
 
-    def run(self, project, location, credentials):
+    def run(self, project_id, location, credentials):
 
         if self.last_group_loader.last_group is None:
 
@@ -85,7 +120,7 @@ class HackerNewsHourly(L.LightningFlow):
 
             self.last_group_getter.run(
                 query=query,
-                project=project,
+                project=project_id,
                 location=location,
                 credentials=credentials,
                 to_dataframe=True,
@@ -96,7 +131,7 @@ class HackerNewsHourly(L.LightningFlow):
 
         # Start recurring loop.
 
-        if self.schedule("* * * * *"):#"hourly"):
+        if self.schedule("*/5 * * * *"):
             self.should_execute = True
 
         if self.should_execute is False:
@@ -126,7 +161,7 @@ class HackerNewsHourly(L.LightningFlow):
                         )
                     ])}
                 """,
-                project=project,
+                project=project_id,
                 location=location,
                 credentials=credentials,
             )
