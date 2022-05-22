@@ -1,0 +1,25 @@
+user1
+ - fav_11
+ - fav_12
+ - fav_13
+ - fav_14
+
+user2
+ - fav_21
+ - fav_22
+ - fav_23
+ - fav_24
+
+browsed_news = [{'title': [fav11, fav21]}, {'title': [fav12, fav22]}, {'title': [fav13, fav23]}]
+- we have to consider some min length here. No padding allowed in case user1 has 50 and user2 has 20
+
+candidate = [{'title': [fav14, fav24]}, {'title': [nonfav15, nonfav25]}, {'title': [nonfav16, nonfav26]}]
+targets = [1, 0, 0]
+
+
+
+
+
+
+
+

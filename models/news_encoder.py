@@ -6,7 +6,7 @@ from model.general.attention.additive import AdditiveAttention
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-class StoryEncoder(torch.nn.Module):
+class NewsEncoder(torch.nn.Module):
     def __init__(self, config, pretrained_word_embedding):
         super().__init__()
         self.config = config
