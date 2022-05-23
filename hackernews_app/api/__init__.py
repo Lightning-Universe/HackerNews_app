@@ -1,5 +1,5 @@
 import logging
-import os
+from typing import Optional, Dict
 import time
 
 import requests
