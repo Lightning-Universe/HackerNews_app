@@ -36,7 +36,7 @@ class RESTAPI:
     def __init__(
         self,
         api_key: str = "",
-        params: dict = {},
+        params: Optional[Dict] = None,
         base_url: str = constants.HACKERNEWS_BASEURL,
     ):
 
