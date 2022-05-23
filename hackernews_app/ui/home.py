@@ -16,8 +16,10 @@ def user_welcome(state: AppState):
 def recommendations(state: AppState):
     data = {
         "Story Title": [
-            "Lightning.ai just released the biggest app",
-            "Is baseball a real sport?",
+            """<a href='https://shopify.engineering/lessons-learned-apache-airflow-scale'>
+            Lessons Learned from Running Apache Airflow at Scale</a>""",
+            """<a href='https://blog.derhagen.eu/2022/05/23/im-quitting-my-phd.html'>
+            I'm quitting my PhD (derhagen.eu)</a>""",
         ],
         "Category": ["Tech", "Sport"],
         "Created on": ["June 16th, 2022", "June 17th, 2022"],
@@ -33,7 +35,8 @@ def recommendations(state: AppState):
 
     # Inject CSS with Markdown
     st.markdown(hide_table_row_index, unsafe_allow_html=True)
-    st.table(df)
+    # st.table(df)
+    st.write(df.to_html(escape=False, index=False), unsafe_allow_html=True)
 
 
 def your_streamlit_app(lightning_app_state):
@@ -41,7 +44,7 @@ def your_streamlit_app(lightning_app_state):
     recommendations(lightning_app_state)
 
 
-class LitStreamlit(L.LightningFlow):
+class HackerNewsUI(L.LightningFlow):
     def __init__(self):
         super().__init__()
         self.username = None
