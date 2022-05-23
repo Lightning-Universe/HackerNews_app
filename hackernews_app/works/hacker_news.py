@@ -1,4 +1,7 @@
 import logging
+import json
+import urllib
+import datetime as dt
 import lightning as L
 from typing import Callable
 import google
@@ -7,6 +10,39 @@ from concurrent import futures
 
 from hackernews_app.api import RESTAPI
 from hackernews_app.api.hackernews import constants
+
+
+STORIES_SCHEMA = [
+    "title",
+    "url",
+    "text",
+    "dead",
+    "by",
+    "score",
+    "time",
+    "timestamp",
+    "type",
+    "id",
+    "parent",
+    "descendants",
+    "ranking",
+    "deleted",
+    "created_at",
+]
+
+class HackerNewsRequestAPI(L.LightningWork):
+
+
+    def __init__(self):
+        super().__init__()
+        self.base_url = constants.HACKERNEWS_BASEURL
+        self.response_data = {}
+
+    def run(self, path: str):
+        client = RESTAPI(self.base_url)
+        response = client.get(path)
+        self.response_data = response.json()
+
 
 class HackerNewsGetItem(L.LightningWork):
     """Gets new stories.
@@ -34,14 +70,23 @@ class HackerNewsGetItem(L.LightningWork):
                 self.max_item = response.json()
 
         while True:
+            _data = {col: None for col in STORIES_SCHEMA}
+
             response = client.get(constants.HACKERNEWS_ITEMS_ENDPOINT.format(id=self.max_item))
             data = response.json()
 
             if response.status_code != 200 or data is None:
                 logging.info(f"Did not see anything. The last item retrieved: {self.max_item}")
-                self.publish()
+                # TODO: revisit when there is time to look into using the Payload API for serializing bytes
+                #       The current implementation can publish the text but there is some decoding issues from
+                #       the subscriber.
+                #self.publish()
                 return
-            self.data = [*self.data, str(response.content)]
+
+            if data.get("url"):
+                data["url"] = urllib.parse.quote(data["url"])
+            _data.update(data)
+            self.data = [*self.data, json.dumps(_data)]
             logging.info(f"Found a new item: {data}")
             self.max_item += 1
             logging.info(f"The last item retrieved: {self.max_item}")
@@ -67,10 +112,12 @@ class HackerNewsGetItem(L.LightningWork):
 
             return callback
 
-        while len(self.data) > 0:
-            message = self.data.pop()
-            message = str(message)
-            future = publisher.publish(self.topic_name, message.encode("utf-8"))
+
+        for message in self.data:
+
+            print(f"Message published: {message}")
+
+            future = publisher.publish(self.topic_name, message)
             future.add_done_callback(get_callback(future, message))
             publish_futures.append(future)
 
@@ -87,6 +134,7 @@ class HackerNewsSubscriber(L.LightningWork):
         self.subscription = subscription
         self.subscription_name = f"projects/{project_id}/subscriptions/{subscription}"
         self.messages = []
+        self.unacknowledged = 0
 
 
     def run(self):
@@ -115,14 +163,26 @@ class HackerNewsSubscriber(L.LightningWork):
             response = subscriber.pull(
                 request={
                     "subscription": subscription_path,
-                    "max_messages": 5,
+                    "max_messages": 10,
                 }
             )
-
+            ack_ids = []
             for msg in response.received_messages:
-                self.messages = [*self.messages, str(msg.message.data)]
+                print(f"msg.message.data: {msg.message.data}")
+                if not msg.message.data:
+                    return
 
-            ack_ids = [msg.ack_id for msg in response.received_messages]
+                # TODO: Extremely hacky because of the limitations with passing data between works.
+                message = msg.message.data.decode("utf-8").lstrip('b\'').rstrip("\\'")
+
+                self.messages = [
+                    *self.messages,
+                    {**json.loads(message), **{"created_at": dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}}
+                ]
+                ack_ids.append(msg.ack_id)
+
+            if len(ack_ids) < 0:
+                return
             subscriber.acknowledge(
                 request={
                     "subscription": subscription_path,
