@@ -13,7 +13,6 @@ class HackerNewsApp(L.LightningFlow):
     def run(self):
         print("Hello")
         self.hacker_news_etl.run()
-        self._exit()
 
     def configure_layout(self):
         return {"name": "home", "content": self.lit_streamlit}
