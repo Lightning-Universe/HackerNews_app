@@ -15,11 +15,3 @@ browsed_news = [{'title': [fav11, fav21]}, {'title': [fav12, fav22]}, {'title': 
 
 candidate = [{'title': [fav14, fav24]}, {'title': [nonfav15, nonfav25]}, {'title': [nonfav16, nonfav26]}]
 targets = [1, 0, 0]
-
-
-
-
-
-
-
-

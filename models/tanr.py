@@ -1,8 +1,9 @@
+import torch
 from torch import nn
+
+from models.dot_product import DotProductClickPredictor
 from models.news_encoder import NewsEncoder
 from models.user_encoder import UserEncoder
-from models.dot_product import DotProductClickPredictor
-import torch
 
 
 class TANR(nn.Module):
@@ -31,11 +32,9 @@ class TANR(nn.Module):
             click_probability: batch_size, 1 + K
         """
         # batch_size, 1 + K, num_filters
-        candidate_news_vector = torch.stack(
-            [self.news_encoder(x) for x in candidate_news], dim=1)
+        candidate_news_vector = torch.stack([self.news_encoder(x) for x in candidate_news], dim=1)
         # batch_size, num_clicked_news_a_user, num_filters
-        browsed_news_vector = torch.stack(
-            [self.news_encoder(x) for x in browsed_news], dim=1)
+        browsed_news_vector = torch.stack([self.news_encoder(x) for x in browsed_news], dim=1)
         # batch_size, num_filters
         user_vector = self.user_encoder(browsed_news_vector)
         # batch_size, 1 + K

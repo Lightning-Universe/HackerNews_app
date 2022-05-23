@@ -6,14 +6,10 @@ import torch.nn.functional as F
 class AdditiveAttention(torch.nn.Module):
     """A general additive attention module."""
 
-    def __init__(
-        self, query_vector_dim, candidate_vector_dim, tag=None, names=None
-    ):
+    def __init__(self, query_vector_dim, candidate_vector_dim, tag=None, names=None):
         super().__init__()
         self.linear = nn.Linear(candidate_vector_dim, query_vector_dim)
-        self.attention_query_vector = nn.Parameter(
-            torch.empty(query_vector_dim).uniform_(-0.1, 0.1)
-        )
+        self.attention_query_vector = nn.Parameter(torch.empty(query_vector_dim).uniform_(-0.1, 0.1))
         self.tag = tag
         self.names = names
         self.local_step = 1
@@ -27,14 +23,10 @@ class AdditiveAttention(torch.nn.Module):
         """
         # batch_size, candidate_size, query_vector_dim
         temp = torch.tanh(self.linear(candidate_vector))
-        
+
         # batch_size, candidate_size
-        candidate_weights = F.softmax(
-            torch.matmul(temp, self.attention_query_vector), dim=1
-        )
+        candidate_weights = F.softmax(torch.matmul(temp, self.attention_query_vector), dim=1)
 
         # batch_size, candidate_vector_dim
-        target = torch.bmm(
-            candidate_weights.unsqueeze(dim=1), candidate_vector
-        ).squeeze(dim=1)
+        target = torch.bmm(candidate_weights.unsqueeze(dim=1), candidate_vector).squeeze(dim=1)
         return target

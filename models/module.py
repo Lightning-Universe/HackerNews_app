@@ -1,29 +1,29 @@
 import torch
-from torch import optim, nn
+from torch import nn, optim
+from torchmetrics import Accuracy, AUROC, MetricCollection
 
-from pytorch_lightning import LightningDataModule, LightningModule, Trainer
 from models.tanr import TANR
-from datamodule.dataset import TANRDataset
-from torch.utils.data import DataLoader
-from torchmetrics import Accuracy, AUROC, RetrievalNormalizedDCG, MetricCollection
-import torch.nn.functional as F
+from pytorch_lightning import LightningModule
+
 
 class TANRModule(LightningModule):
-    def __init__(self, config, pretrained_word_embeddings=None):
+    def __init__(self, config, pretrained_word_embedding=None):
         super().__init__()
         self.config = config
-        self.model = TANR(config, pretrained_word_embedding=None)
+        self.model = TANR(config, pretrained_word_embedding=pretrained_word_embedding)
 
-        metrics = MetricCollection({
-            'acc': Accuracy(),
-            'auroc': AUROC(),
-        })
-        self.train_metrics = metrics.clone(prefix='train_')
-        self.valid_metrics = metrics.clone(prefix='val_')
+        metrics = MetricCollection(
+            {
+                "acc": Accuracy(),
+                "auroc": AUROC(),
+            }
+        )
+        self.train_metrics = metrics.clone(prefix="train_")
+        self.valid_metrics = metrics.clone(prefix="val_")
         self.loss_fn = nn.CrossEntropyLoss()
 
     def training_step(self, batch, batch_idx):
-        logits = self.model(batch['candidate_news'], batch['browsed_news'])
+        logits = self.model(batch["candidate_news"], batch["browsed_news"])
         targets = torch.zeros(logits.shape[0]).long().to(self.device)
         loss = self.loss_fn(logits, targets)
         targets = torch.zeros_like(logits).long()
@@ -35,7 +35,7 @@ class TANRModule(LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        logits = self.model(batch['candidate_news'], batch['browsed_news'])
+        logits = self.model(batch["candidate_news"], batch["browsed_news"])
         targets = torch.zeros(logits.shape[0]).long().to(self.device)
         loss = self.loss_fn(logits, targets)
         targets = torch.zeros_like(logits).long()
@@ -43,7 +43,7 @@ class TANRModule(LightningModule):
         logits = logits.view(-1).sigmoid()
         targets = targets.view(-1)
         metrics = self.valid_metrics(logits, targets)
-        self.log('val_loss', loss, prog_bar=True)
+        self.log("val_loss", loss, prog_bar=True)
         self.log_dict(metrics, prog_bar=True)
 
     def configure_optimizers(self):
@@ -82,7 +82,4 @@ class TANRModule(LightningModule):
             click_probability: candidate_size
         """
         # candidate_size
-        return self.model.click_predictor(
-            news_vector.unsqueeze(dim=0),
-            user_vector.unsqueeze(dim=0)).squeeze(dim=0)
-
+        return self.model.click_predictor(news_vector.unsqueeze(dim=0), user_vector.unsqueeze(dim=0)).squeeze(dim=0)

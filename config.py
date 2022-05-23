@@ -1,5 +1,14 @@
-class BaseConfig():
-    """General configuration."""
+import os
+
+
+class BaseDataConfig:
+    least_fav_topic_count = 4
+    val_split_pct = 0.2
+
+
+class BaseConfig:
+    """General configurations appiled to all models."""
+
     num_epochs = 2
     num_batches_show_loss = 100  # Number of batchs to show loss
     # Number of batchs to check metrics on validation dataset
@@ -28,10 +37,9 @@ class BaseConfig():
     query_vector_dim = 200
 
 
-class TANRConfig(BaseConfig):
-    dataset_attributes = {"news": ['category', 'title'], "record": []}
+class TANRConfig(BaseConfig, BaseDataConfig):
+    dataset_attributes = {"news": ["category", "title"], "record": []}
     # For CNN
     num_filters = 300
     window_size = 3
     topic_classification_loss_weight = 0.1
-
