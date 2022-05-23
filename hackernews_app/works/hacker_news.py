@@ -59,6 +59,7 @@ class HackerNewsGetItem(L.LightningWork):
         self.project_id = project_id
         self.topic = topic
         self.topic_name = f"projects/{project_id}/topics/{topic}"
+        self.publish_timeout = 60
 
     def run(self):
 
