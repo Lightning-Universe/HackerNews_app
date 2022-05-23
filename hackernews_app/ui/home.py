@@ -14,9 +14,12 @@ def user_welcome(state: AppState):
 
 def recommendations(state: AppState):
     data = {
-        "Story Title": ["Lightning.ai just released the biggest app"],
-        "Category": ["Tech"],
-        "Created on": ["June 16th, 2022"],
+        "Story Title": [
+            "Lightning.ai just released the biggest app",
+            "Is baseball a real sport?",
+        ],
+        "Category": ["Tech", "Sport"],
+        "Created on": ["June 16th, 2022", "June 17th, 2022"],
     }
     df = pd.DataFrame(data)
 
