@@ -3,7 +3,7 @@ import streamlit as st
 
 
 def your_streamlit_app(lightning_app_state):
-    st.write('hello world')
+    st.write("hello world")
 
 
 class LitStreamlit(L.LightningFlow):

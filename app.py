@@ -5,7 +5,6 @@ from hackernews_app.ui.home import LitStreamlit
 
 
 class HackerNewsApp(L.LightningFlow):
-
     def __init__(self):
         super().__init__()
         self.hacker_news_etl = HackerNewsETL()
