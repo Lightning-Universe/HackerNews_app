@@ -43,8 +43,8 @@ class HackerNewsLiveStories(L.LightningFlow):
     def run(self, credentials):
 
         if self.item_getter.has_succeeded and self.item_getter.data and self.is_bq_inserting is False:
-            print(self.item_getter.max_item)
-            print(self.is_bq_inserting)
+            logging.info(self.item_getter.max_item)
+            logging.info(self.is_bq_inserting)
             self.is_bq_inserting = True
             self.bq_inserter.run(
                 query=None,
@@ -64,7 +64,7 @@ class HackerNewsLiveStories(L.LightningFlow):
 
         if self.bq_inserter.has_succeeded and self.is_bq_inserting is True:
             self.is_bq_inserting = False
-            print("Resetting item getter data")
+            logging.info("Resetting item getter data")
             self.item_getter.data = []
 
         if not self.item_getter.has_started:
@@ -73,7 +73,7 @@ class HackerNewsLiveStories(L.LightningFlow):
         logging.info(f"getter data: {self.item_getter.data}")
 
         if len(self.subscriber.messages) > 0:
-            print(f"subscriber: {self.subscriber.messages}")
+            logging.info(f"subscriber: {self.subscriber.messages}")
             self.on_after_run(credentials)
 
         time.sleep(self.time_interval)
