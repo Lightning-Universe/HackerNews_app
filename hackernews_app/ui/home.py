@@ -39,7 +39,7 @@ def recommendations(state: AppState):
     st.write(df.to_html(escape=False, index=False), unsafe_allow_html=True)
 
 
-def your_streamlit_app(lightning_app_state):
+def home_ui(lightning_app_state):
     user_welcome(lightning_app_state)
     recommendations(lightning_app_state)
 
@@ -50,4 +50,4 @@ class HackerNewsUI(L.LightningFlow):
         self.username = None
 
     def configure_layout(self):
-        return L.frontend.StreamlitFrontend(render_fn=your_streamlit_app)
+        return L.frontend.StreamlitFrontend(render_fn=home_ui)
