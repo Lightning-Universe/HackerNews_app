@@ -42,29 +42,29 @@ class HackerNewsLiveStories(L.LightningFlow):
 
     def run(self, credentials):
 
-        if self.item_getter.has_succeeded and self.item_getter.data:
-            if self.is_bq_inserting is False:
-                print(self.item_getter.max_item)
-                print(self.is_bq_inserting)
-                self.is_bq_inserting = True
-                self.bq_inserter.run(
-                    query=None,
-                    project=self.project_id,
-                    location=self.location,
-                    credentials=credentials,
-                    json_rows=[
-                        {
-                            **json.loads(data),
-                            **{"created_at": dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}
-                        }
-                        for data in self.item_getter.data
-                    ],
-                    table="hacker_news.stories"
-                )
-                #self.subscriber.run()
+        if self.item_getter.has_succeeded and self.item_getter.data and self.is_bq_inserting is False:
+            print(self.item_getter.max_item)
+            print(self.is_bq_inserting)
+            self.is_bq_inserting = True
+            self.bq_inserter.run(
+                query=None,
+                project=self.project_id,
+                location=self.location,
+                credentials=credentials,
+                json_rows=[
+                    {
+                        **json.loads(data),
+                        **{"created_at": dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}
+                    }
+                    for data in self.item_getter.data
+                ],
+                table="hacker_news.stories"
+            )
+            #self.subscriber.run()
 
-        if self.bq_inserter.has_succeeded:
+        if self.bq_inserter.has_succeeded and self.is_bq_inserting is True:
             self.is_bq_inserting = False
+            print("Resetting item getter data")
             self.item_getter.data = []
 
         if not self.item_getter.has_started:
