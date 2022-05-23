@@ -9,7 +9,6 @@ def user_welcome(state: AppState):
         st.title("Welcome to HackerRec!")
         state.username = st.text_input("Username...")
     else:
-        print(state.username)
         st.title(f"Hey {state.username}, Here are your recommendations!")
 
 
@@ -20,6 +19,16 @@ def recommendations(state: AppState):
         "Created on": ["June 16th, 2022"],
     }
     df = pd.DataFrame(data)
+
+    hide_table_row_index = """
+                <style>
+                tbody th {display:none}
+                .blank {display:none}
+                </style>
+                """
+
+    # Inject CSS with Markdown
+    st.markdown(hide_table_row_index, unsafe_allow_html=True)
     st.table(df)
 
 
