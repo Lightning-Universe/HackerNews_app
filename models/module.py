@@ -1,39 +1,54 @@
 import torch
+from torch import optim, nn
 
 from pytorch_lightning import LightningDataModule, LightningModule, Trainer
 from models.tanr import TANR
-
-
-class TANRDataModule(LightningDataModule):
-    def __init__(self):
-        super().__init__()
-
-    def train_dataloader(self):
-        pass
-
-    def val_dataloader(self):
-        pass
-
-    def predict_dataloader(self):
-        pass
-
+from datamodule.dataset import TANRDataset
+from torch.utils.data import DataLoader
+from torchmetrics import Accuracy, AUROC, RetrievalNormalizedDCG, MetricCollection
+import torch.nn.functional as F
 
 class TANRModule(LightningModule):
-    def __init__(self):
+    def __init__(self, config, pretrained_word_embeddings=None):
         super().__init__()
-        self.model = TANR()
+        self.config = config
+        self.model = TANR(config, pretrained_word_embedding=None)
+
+        metrics = MetricCollection({
+            'acc': Accuracy(),
+            'auroc': AUROC(),
+        })
+        self.train_metrics = metrics.clone(prefix='train_')
+        self.valid_metrics = metrics.clone(prefix='val_')
+        self.loss_fn = nn.CrossEntropyLoss()
 
     def training_step(self, batch, batch_idx):
-        pass
+        logits = self.model(batch['candidate_news'], batch['browsed_news'])
+        targets = torch.zeros(logits.shape[0]).long().to(self.device)
+        loss = self.loss_fn(logits, targets)
+        targets = torch.zeros_like(logits).long()
+        targets[..., 0] = 1
+        logits = logits.view(-1).sigmoid()
+        targets = targets.view(-1)
+        metrics = self.train_metrics(logits, targets)
+        self.log_dict(metrics, prog_bar=True)
+        return loss
 
     def validation_step(self, batch, batch_idx):
-        pass
-
-    def predict_step(self, batch, batch_idx):
-        pass
+        logits = self.model(batch['candidate_news'], batch['browsed_news'])
+        targets = torch.zeros(logits.shape[0]).long().to(self.device)
+        loss = self.loss_fn(logits, targets)
+        targets = torch.zeros_like(logits).long()
+        targets[..., 0] = 1
+        logits = logits.view(-1).sigmoid()
+        targets = targets.view(-1)
+        metrics = self.valid_metrics(logits, targets)
+        self.log('val_loss', loss, prog_bar=True)
+        self.log_dict(metrics, prog_bar=True)
 
     def configure_optimizers(self):
-        pass
+        optimizer = optim.Adam(self.parameters(), lr=self.config.learning_rate)
+        return optimizer
 
     def get_news_vector(self, news):
         """
@@ -71,6 +86,3 @@ class TANRModule(LightningModule):
             news_vector.unsqueeze(dim=0),
             user_vector.unsqueeze(dim=0)).squeeze(dim=0)
 
-
-if __name__ == '__main__':
-    

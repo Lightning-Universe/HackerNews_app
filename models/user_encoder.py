@@ -1,5 +1,5 @@
 import torch
-from additive import AdditiveAttention
+from models.additive import AdditiveAttention
 
 
 class UserEncoder(torch.nn.Module):

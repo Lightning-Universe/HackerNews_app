@@ -1,10 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from model.general.attention.additive import AdditiveAttention
-
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
+from models.additive import AdditiveAttention
 
 class NewsEncoder(torch.nn.Module):
     def __init__(self, config, pretrained_word_embedding):
@@ -41,7 +38,7 @@ class NewsEncoder(torch.nn.Module):
         """
         # batch_size, num_words_title, word_embedding_dim
         title_vector = F.dropout(
-            self.word_embedding(stories["title"].to(device)),
+            self.word_embedding(stories["title"]),
             p=self.config.dropout_probability,
             training=self.training,
         )
