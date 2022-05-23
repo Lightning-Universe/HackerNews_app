@@ -88,8 +88,8 @@ class HackerNewsGetItem(L.LightningWork):
             _data.update(data)
             self.data = [*self.data, json.dumps(_data)]
             logging.info(f"Found a new item: {data}")
-            self.max_item += 1
             logging.info(f"The last item retrieved: {self.max_item}")
+            self.max_item += 1
 
 
     def publish(self):
