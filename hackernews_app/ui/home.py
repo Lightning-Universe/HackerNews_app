@@ -5,9 +5,10 @@ from lightning.utilities.state import AppState
 
 
 def user_welcome(state: AppState):
+    dummy_users = [None, "Marc", "Aniket", "Rohit", "Kaushik"]
     if not state.username:
         st.title("Welcome to HackerRec!")
-        state.username = st.text_input("Username...")
+        state.username = st.selectbox("Select user", dummy_users)
     else:
         st.title(f"Hey {state.username}, Here are your recommendations!")
 
