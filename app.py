@@ -11,7 +11,6 @@ class HackerNewsApp(L.LightningFlow):
         self.lit_streamlit = LitStreamlit()
 
     def run(self):
-        print("Hello")
         self.hacker_news_etl.run()
 
     def configure_layout(self):
