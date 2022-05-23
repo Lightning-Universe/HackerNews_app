@@ -19,4 +19,8 @@ class HackerNewsDataProcesses(L.LightningFlow):
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     app = L.LightningApp(HackerNewsDataProcesses())
+=======
+    app = L.LightningApp(HackerNewsApp())
+>>>>>>> 72323e5 (formating)
