@@ -60,6 +60,9 @@ class HackerNewsLiveStories(L.LightningFlow):
                 ],
                 table="hacker_news.stories"
             )
+            # TODO: Comeback to enabule the subscriber. There is an issue with passing/receiving data from pubsub.
+            #       It is encoding the byte representation as a literal string. i.e. 'foo bar' gets received by
+            #       the subscriber as byte("b'foo bar'") -- creating issues with urls.
             #self.subscriber.run()
 
         if self.bq_inserter.has_succeeded and self.is_bq_inserting is True:
@@ -74,11 +77,11 @@ class HackerNewsLiveStories(L.LightningFlow):
 
         if len(self.subscriber.messages) > 0:
             logging.info(f"subscriber: {self.subscriber.messages}")
-            self.on_after_run(credentials)
+            self.on_after_run()
 
         time.sleep(self.time_interval)
 
-    def on_after_run(self, credentials):
+    def on_after_run(self):
 
         self.subscriber.messages = []
 
