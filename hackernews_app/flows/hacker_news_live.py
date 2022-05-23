@@ -70,7 +70,7 @@ class HackerNewsLiveStories(L.LightningFlow):
         if not self.item_getter.has_started:
             self.item_getter.run()
 
-        print(f"getter data: {self.item_getter.data}")
+        logging.info(f"getter data: {self.item_getter.data}")
 
         if len(self.subscriber.messages) > 0:
             print(f"subscriber: {self.subscriber.messages}")
