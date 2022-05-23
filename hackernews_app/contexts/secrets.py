@@ -13,6 +13,7 @@ def get_secrets():
     filepaths = [
         os.path.join(os.path.dirname(__file__), ".secrets.json"),
         os.path.join(str(Path.home()), ".lightning.secrets/.secrets.json"),
+        os.path.join(str(Path.home()), ".secrets.json"),
         os.path.join(os.path.dirname(__file__), ".qa.secrets.json"),
     ]
 

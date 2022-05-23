@@ -2,6 +2,7 @@ import lightning as L
 from hackernews_app.flows import HackerNewsLiveStories, HackerNewsHourly
 from hackernews_app.flows.model_serve import ModelServeFlow
 from hackernews_app.contexts.secrets import LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS
+from hackernews_app.flows.secrets_ui import BigQuerySecretsUI
 
 class HackerNewsDataProcesses(L.LightningFlow):
 
@@ -14,8 +15,15 @@ class HackerNewsDataProcesses(L.LightningFlow):
         )
         self.hacker_news_batch = HackerNewsHourly()
         self.model_service = ModelServeFlow()
+        self.bq_secrets_uploader = BigQuerySecretsUI()
 
     def run(self):
+
+        self.bq_secrets_uploader.run()
+
+        if self.bq_secrets_uploader.secrets is None:
+            return
+
         self.model_service.run()
         self.hacker_news_live_stories.run(credentials=LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS)
         self.hacker_news_batch.run(
@@ -23,6 +31,7 @@ class HackerNewsDataProcesses(L.LightningFlow):
             project_id=LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS.project_id,
             credentials=LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS
         )
+
 
 if __name__ == "__main__":
     app = L.LightningApp(HackerNewsDataProcesses())
