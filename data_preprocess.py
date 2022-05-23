@@ -98,10 +98,10 @@ if __name__ == "__main__":
     final_data = []
 
     # sampling
-    for i, row in tqdm(user_titles.head(10).iterrows(), total=user_titles.shape[0]):
+    for i, row in tqdm(user_titles.head(2000).iterrows(), total=user_titles.shape[0]):
         pairs = []
         user = row["user_favorite"]
-        titles = row["title"]
+        titles = row["title"][-config.num_words_abstract :]  # TODO: take the most recent
         user_least_fav = least_fav[user]
 
         lfav_titles = df.loc[
