@@ -1,7 +1,10 @@
 import lightning as L
 import pandas as pd
+import requests
 import streamlit as st
 from lightning.utilities.state import AppState
+
+from config import HACKERNEWS_API
 
 
 def user_welcome(state: AppState):
@@ -14,15 +17,21 @@ def user_welcome(state: AppState):
 
 
 def recommendations(state: AppState):
+    response = requests.get(HACKERNEWS_API).json()
+    titles, topics, created_dates = [], [], []
+    for id, story_data in response.items():
+        title = story_data['orig_title']
+        url = story_data['url']
+        topic = story_data["topic"]
+        created_on = None  # TODO: fetch date here
+        titles.append(f"<a href='{url}'>{title}</a>")
+        topics.append(topic)
+        created_dates.append(created_on)
+
     data = {
-        "Story Title": [
-            """<a href='https://shopify.engineering/lessons-learned-apache-airflow-scale'>
-            Lessons Learned from Running Apache Airflow at Scale</a>""",
-            """<a href='https://blog.derhagen.eu/2022/05/23/im-quitting-my-phd.html'>
-            I'm quitting my PhD (derhagen.eu)</a>""",
-        ],
-        "Category": ["Tech", "Sport"],
-        "Created on": ["June 16th, 2022", "June 17th, 2022"],
+        "Story Title": titles,
+        "Category": topics,
+        "Created on": created_dates,
     }
     df = pd.DataFrame(data)
 
