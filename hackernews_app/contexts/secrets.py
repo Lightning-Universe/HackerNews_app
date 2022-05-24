@@ -12,8 +12,6 @@ from google.oauth2 import service_account
 def get_secrets():
     filepaths = [
         os.path.join(os.path.dirname(__file__), ".secrets.json"),
-        os.path.join(str(Path.home()), ".lightning.secrets/.secrets.json"),
-        os.path.join(os.path.dirname(__file__), ".qa.secrets.json"),
     ]
 
     for filepath in filepaths:
@@ -25,9 +23,6 @@ def get_secrets():
 
 
 __SECRETS = get_secrets()
-
 LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS = (
-    service_account.Credentials.from_service_account_info(
-        __SECRETS.get("google_service_account"),
-    )
+    service_account.Credentials.from_service_account_info(__SECRETS)
 )
