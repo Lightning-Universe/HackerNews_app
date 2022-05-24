@@ -6,4 +6,4 @@ tensorboard
 lightning~=0.0.46
 google-cloud-pubsub~=2.12.1
 requests~=2.27.1
--e git+ssh://git@github.com/PyTorchLightning/google-cloud.git@21e0627868c6185b4b0b88276fa496c76e254470#egg=lightning_gcp
+-e git+ssh://git@github.com/PyTorchLightning/google-cloud.git@9ab869e873bf75c9cbac3658af0b56fb10ee99b8#egg=lightning_gcp
