@@ -20,8 +20,8 @@ def recommendations(state: AppState):
     response = requests.get(HACKERNEWS_API).json()
     titles, topics, created_dates = [], [], []
     for id, story_data in response.items():
-        title = story_data['orig_title']
-        url = story_data['url']
+        title = story_data["orig_title"]
+        url = story_data["url"]
         topic = story_data["topic"]
         created_on = None  # TODO: fetch date here
         titles.append(f"<a href='{url}'>{title}</a>")
