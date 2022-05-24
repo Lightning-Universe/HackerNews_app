@@ -1,30 +1,57 @@
+from typing import Dict, List
+
 import lightning as L
 import pandas as pd
+import requests
 import streamlit as st
 from lightning.utilities.state import AppState
 
+from config import HACKERNEWS_TOPICS_DATA, HACKERNEWS_USER_DATA
+
 
 def user_welcome(state: AppState):
-    dummy_users = [None, "Marc", "Aniket", "Rohit", "Kaushik"]
+    users = [""] + list(requests.get(HACKERNEWS_USER_DATA).json().keys())
     if not state.username:
         st.title("Welcome to HackerRec!")
-        state.username = st.selectbox("Select user", dummy_users)
+        state.username = st.selectbox("Select user", users)
     else:
         st.title(f"Hey {state.username}, Here are your recommendations!")
 
 
-def recommendations(state: AppState):
+def get_story_data(username=None):
+    response = requests.get(HACKERNEWS_TOPICS_DATA).json()
+    titles, topics, created_dates = [], [], []
+    user_data = None
+    if username:
+        user_data = get_user_data(username)
+
+    for story_id, story_data in response.items():
+        if not username or story_id in user_data:
+            title = story_data["orig_title"]
+            url = story_data["url"]
+            topic = story_data["topic"]
+            created_on = "24th May 2022"  # TODO: fetch date here
+            titles.append(f"<a href='{url}'>{title}</a>")
+            topics.append(topic)
+            created_dates.append(created_on)
+
     data = {
-        "Story Title": [
-            """<a href='https://shopify.engineering/lessons-learned-apache-airflow-scale'>
-            Lessons Learned from Running Apache Airflow at Scale</a>""",
-            """<a href='https://blog.derhagen.eu/2022/05/23/im-quitting-my-phd.html'>
-            I'm quitting my PhD (derhagen.eu)</a>""",
-        ],
-        "Category": ["Tech", "Sport"],
-        "Created on": ["June 16th, 2022", "June 17th, 2022"],
+        "Story Title": titles,
+        "Category": topics,
+        "Created on": created_dates,
     }
     df = pd.DataFrame(data)
+    return df
+
+
+def get_user_data(username: str) -> Dict[str, float]:
+    users = requests.get(HACKERNEWS_USER_DATA).json()
+    user: List[Dict[str, float]] = users[username]
+    return {list(e.keys())[0]: list(e.values())[0] for e in user}
+
+
+def recommendations(state: AppState):
+    df = get_story_data(state.username)
 
     hide_table_row_index = """
                 <style>
