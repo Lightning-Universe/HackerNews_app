@@ -23,7 +23,7 @@ def recommendations(state: AppState):
         title = story_data["orig_title"]
         url = story_data["url"]
         topic = story_data["topic"]
-        created_on = None  # TODO: fetch date here
+        created_on = "24th May 2022"  # TODO: fetch date here
         titles.append(f"<a href='{url}'>{title}</a>")
         topics.append(topic)
         created_dates.append(created_on)
