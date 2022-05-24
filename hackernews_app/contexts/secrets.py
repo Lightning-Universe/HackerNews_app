@@ -21,7 +21,7 @@ def get_secrets():
             logging.info(f"Using secrets from {filepath}")
             return json.load(open(filepath))
 
-    logging.error(f"Did not find secrets in {filepaths}")
+    raise UserWarning(f"Did not find secrets in {filepaths}")
 
 
 __SECRETS = get_secrets()
