@@ -10,25 +10,23 @@ from config import HACKERNEWS_TOPICS_DATA, HACKERNEWS_USER_DATA
 
 
 def user_welcome(state: AppState):
-    users = [""] + list(requests.get(HACKERNEWS_USER_DATA).json().keys())
-    intro, recommedations = st.columns(2)
+    users = list(requests.get(HACKERNEWS_USER_DATA).json().keys())
+    intro, logo = st.columns(2)
     if not state.username:
         intro.title("👋 Welcome to HackerRec!")
         intro.subheader("Personalized HackerNews stories for you ⚡️")
         state.username = intro.text_input("Enter username")
-        recommedations.image("visuals/hn.jpeg", width=300)
     elif state.username is not None and state.username not in users:
-        intro.subheader("Oops! ")
+        intro.subheader("Oops! :eyes:")
         intro.error(f"Incorrect username: {state.username}. Select any one of these users: {users}")
         if intro.button("Want to try a different username?"):
             state.username = None
-        recommedations.image("visuals/hn.jpeg", width=300)
     else:
         intro.title(f"👋 Hey {state.username}!")
-        intro.subheader("⚡ Here are the personalized HackerNews stories for you ⚡️")
+        intro.subheader("Here are the personalized HackerNews stories for you! ⚡️")
         if intro.button("Change username?"):
             state.username = None
-
+    logo.image("visuals/hn.jpeg", width=300)
 
 
 def get_story_data(username: str):
@@ -64,6 +62,12 @@ def recommendations(state: AppState):
     if not state.username:
         return
     df = get_story_data(state.username)
+    unique_categories = df["Category"].unique()
+    
+    options = st.multiselect("What are you interested in?", unique_categories)
+    
+    if len(options) > 0:
+        df = df.loc[df.apply(lambda x: x.Category in options, axis=1)]
 
     hide_table_row_index = """
                 <style>
@@ -79,8 +83,9 @@ def recommendations(state: AppState):
 
 
 def home_ui(lightning_app_state):
+    st.set_page_config(page_title="HackerNews App", page_icon="⚡️", layout="centered")
     user_welcome(lightning_app_state)
-    # recommendations(lightning_app_state)
+    recommendations(lightning_app_state)
 
 
 class HackerNewsUI(L.LightningFlow):
