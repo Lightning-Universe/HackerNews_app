@@ -35,7 +35,7 @@ def recommend(data: Dict, response: Response):
     - batch train, real-time inference
     TODO: look into DVC (https://dvc.org/) or feast (https://docs.feast.dev/).
 
-    Ressponse:
+    Response:
     {
         username: x : STRING
         results: [
@@ -57,8 +57,7 @@ def recommend(data: Dict, response: Response):
 
     query = f"""
     select
-        username
-        , title
+        title
         , url
         , topic
         , cast(creation_date as string) creation_date
@@ -80,26 +79,14 @@ def recommend(data: Dict, response: Response):
             "results": [],
             "type": "top",
         }
-
     else:
-        _type = "top" if user_recommendation_df.empty else "recommendation"
-
         logging.info(f"User recommendation data frame return: {user_recommendation_df}")
-        response = (
-            user_recommendation_df.groupby("username")
-            .apply(
-                lambda x: x[[col for col in user_recommendation_df.columns if col != "username"]].to_json(
-                    orient="records"
-                )
-            )
-            .to_dict()
-        )
-        key = (*response,)[0]
-        recommendations = json.loads(response.get(key, []))
+        response = user_recommendation_df.to_json(orient="records")
+        recommendations = json.loads(response)
 
         response = {
             "results": recommendations,
-            "type": _type,
+            "type": "recommendation",
         }
 
     return response
