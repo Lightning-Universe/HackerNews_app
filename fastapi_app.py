@@ -58,7 +58,7 @@ def recommend(data: Dict, response: Response):
     from
         `hacker_news.v_lightningapp_hackernews_recommend`
     where
-        username='{username}'
+        lower(username) = '{username.lower()}'
     order by
         ranking
     """
