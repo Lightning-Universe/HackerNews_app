@@ -22,7 +22,6 @@ def user_welcome(state: AppState):
 
 
 def get_story_data(username: str):
-    print(requests.get(HACKERNEWS_TOPICS_DATA))
     response = requests.get(HACKERNEWS_TOPICS_DATA).json()
     titles, topics, created_dates = [], [], []
     user_data = get_user_data(username)
