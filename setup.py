@@ -8,7 +8,7 @@ setuptools.setup(
     version="0.0.1",
     description="Personalized HackerNews stories for you!",
     author="Grid.ai",
-    packages=setuptools.find_packages(where="hackernews_app*"),
+    packages=setuptools.find_packages(),
     install_requires=[requirements],
     include_package_data=False,
     python_requires=">=3.8",
