@@ -6,20 +6,23 @@ from lightning.utilities.state import AppState
 
 def user_welcome(state: AppState):
     intro, logo = st.columns(2)
-    if state.username in (None, ""):
+
+    if not state.username:
         intro.title("👋 Welcome to HackerRec!")
         intro.subheader("Personalized HackerNews stories for you ⚡️")
         state.username = intro.text_input("Enter username")
-    elif state.username == 0:
+    elif (not state.user_status) and state.username:
         intro.subheader("Oops! :eyes:")
-        intro.subheader("Could not found any recommendations for this user.")  # TODO: Add username here
+        intro.subheader(f"Could not found any recommendations for {state.username}.")
         if intro.button("Want to try a different username?"):
             state.username = None
+            state.user_status = False
     else:
         intro.title(f"👋 Hey {state.username}!")
         intro.subheader("Here are the personalized HackerNews stories for you! ⚡️")
         if intro.button("Change username?"):
             state.username = None
+            state.user_status = False
 
     logo.image("visuals/hn.jpeg", width=300)
 
@@ -54,8 +57,10 @@ def recommendations(state: AppState):
     df = get_story_data(state.username, state.server_one.base_url)
 
     if df is None:
-        state.username = 0
+        state.user_status = False
         return
+
+    state.user_status = True
 
     unique_categories = df["Category"].unique()
     options = st.multiselect("What are you interested in?", unique_categories)
