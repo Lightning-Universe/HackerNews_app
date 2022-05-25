@@ -24,11 +24,12 @@ def user_welcome(state: AppState):
     logo.image("visuals/hn.jpeg", width=300)
 
 
-def get_story_data(state: AppState):
+@st.experimental_memo(show_spinner=False)
+def get_story_data(username: str, base_url: str):
     prediction = requests.post(
-        f"{state.server_one.base_url}/api/recommend",
+        f"{base_url}/api/recommend",
         headers={"X-Token": "hailhydra"},
-        json={"username": state.username},
+        json={"username": username},
     )
     recommendations = prediction.json()["results"]
     if not recommendations:
@@ -50,14 +51,13 @@ def recommendations(state: AppState):
     if not state.username:
         return
 
-    df = get_story_data(state)
+    df = get_story_data(state.username, state.server_one.base_url)
 
     if df is None:
         state.username = 0
         return
 
     unique_categories = df["Category"].unique()
-
     options = st.multiselect("What are you interested in?", unique_categories)
 
     if len(options) > 0:

@@ -37,7 +37,6 @@ def recommend(data: Dict, response: Response):
 
     Response:
     {
-        username: x : STRING
         results: [
             {
                 title: STRING,
