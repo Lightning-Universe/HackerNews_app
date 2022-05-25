@@ -10,23 +10,26 @@ from config import HACKERNEWS_TOPICS_DATA, HACKERNEWS_USER_DATA
 
 
 def user_welcome(state: AppState):
+    print(requests.get(HACKERNEWS_USER_DATA))
     users = [""] + list(requests.get(HACKERNEWS_USER_DATA).json().keys())
     if not state.username:
-        st.title("Welcome to HackerRec!")
-        state.username = st.selectbox("Select user", users)
+        st.title("👋 Welcome to HackerRec!")
+        st.subheader("Personalized Hackernews stories for you ⚡️")
+        state.username = st.text_input("Enter username", users)
     else:
-        st.title(f"Hey {state.username}, Here are your recommendations!")
+        st.title(f"👋 Hey {state.username}!")
+        st.subheader("⚡ Here are the personalized Hackernews stories "
+                     "for you ⚡️")
+        state.username = st.text_input("Enter username", users)
 
 
-def get_story_data(username=None):
+def get_story_data(username: str):
+    print(requests.get(HACKERNEWS_TOPICS_DATA))
     response = requests.get(HACKERNEWS_TOPICS_DATA).json()
     titles, topics, created_dates = [], [], []
-    user_data = None
-    if username:
-        user_data = get_user_data(username)
-
+    user_data = get_user_data(username)
     for story_id, story_data in response.items():
-        if not username or story_id in user_data:
+        if story_id in user_data:
             title = story_data["orig_title"]
             url = story_data["url"]
             topic = story_data["topic"]
@@ -51,6 +54,8 @@ def get_user_data(username: str) -> Dict[str, float]:
 
 
 def recommendations(state: AppState):
+    if not state.username:
+        return
     df = get_story_data(state.username)
 
     hide_table_row_index = """
