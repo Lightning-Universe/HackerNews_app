@@ -4,7 +4,6 @@ from typing import Dict
 
 from fastapi import FastAPI, Response, status
 from google.cloud import bigquery
-from pydantic import BaseModel
 
 from hackernews_app.contexts.secrets import LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS
 
@@ -16,10 +15,6 @@ model = None
 BQ_CREDENTIALS = LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS
 BQ_LOCATION = "US"
 BQ_PROJECT = LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS.project_id
-
-
-class UserData(BaseModel):
-    username: str
 
 
 @app.get("/healthz", status_code=status.HTTP_200_OK)

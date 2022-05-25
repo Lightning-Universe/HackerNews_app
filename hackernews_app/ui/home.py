@@ -13,7 +13,7 @@ def user_welcome(state: AppState):
         state.username = intro.text_input("Enter username")
     elif (not state.user_status) and state.username:
         intro.subheader("Oops! :eyes:")
-        intro.subheader(f"Could not found any recommendations for {state.username}.")
+        intro.error(f"Could not find any recommendations for {state.username}.")
         if intro.button("Want to try a different username?"):
             state.username = None
             state.user_status = False
@@ -28,7 +28,7 @@ def user_welcome(state: AppState):
 
 
 @st.experimental_memo(show_spinner=False)
-def get_story_data(username: str, base_url: str):
+def get_user_recommendations(username: str, base_url: str):
     prediction = requests.post(
         f"{base_url}/api/recommend",
         headers={"X-Token": "hailhydra"},
@@ -54,7 +54,7 @@ def recommendations(state: AppState):
     if not state.username:
         return
 
-    df = get_story_data(state.username, state.server_one.base_url)
+    df = get_user_recommendations(state.username, state.server_one.base_url)
 
     if df is None:
         state.user_status = False

@@ -5,7 +5,7 @@ from hackernews_app.works.model_serve import FastAPIWork
 
 
 class ModelServeFlow(L.LightningFlow):
-    """This flow decides which model to use."""
+    """This flow configures the FastAPI and serving UI."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
