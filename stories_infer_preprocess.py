@@ -219,8 +219,8 @@ users = ["AlexClay", "HowardStark", "plibither8", "JimMorrison723", "NovaDev"]
 
 
 fav_data = pd.read_csv("data/filtered_train.csv")
-fav_data = fav_data.loc[fav_data["user_favorite"].isin(users)]
-fav_data["user_favorite"].value_counts()
+# fav_data = fav_data.loc[fav_data["user_favorite"].isin(users)]
+# fav_data["user_favorite"].value_counts()
 
 
 # In[22]:
@@ -273,83 +273,29 @@ fav_data["title"] = fav_data["title"].apply(
 
 user_vector = fav_data.set_index("user_favorite")["title"].to_dict()
 
-for k, v in user_vector.items():
-    user_vector[k] = {"title": torch.tensor(v)}
-
-
-# In[28]:
-
-
-for k, v in tqdm(user_vector.items()):
-    user_vector[k] = embed_model.get_news_vector(v)
-
-
-# In[29]:
-
-
-browsed_news = torch.stack(list(user_vector.values()))
-
-
-# In[30]:
-
-
-user_vector = embed_model.get_user_vector(browsed_news).tolist()
-
-
-# In[31]:
-
-
-user_vector = {fav_data["user_favorite"].iloc[i]: torch.tensor(vec) for i, vec in enumerate(user_vector)}
-
-
-# In[ ]:
-
-
-# In[45]:
-
 
 preds = {}
 
-for user, vec in tqdm(user_vector.items()):
-    preds[user] = embed_model.get_prediction(news_vector, vec).sigmoid().tolist()
-
-
-# In[46]:
-
-
-for k, v in preds.items():
-    preds[k] = [[df.iloc[i]["item_id"], prob] for i, prob in enumerate(v)]
+for k, v in tqdm(user_vector.items()):
+    v = {'title': torch.tensor(v)}
+    browsed_news = embed_model.get_news_vector(v)[None]
+    user_vec = embed_model.get_user_vector(browsed_news)[0]
+    preds[k] = embed_model.get_prediction(news_vector, user_vec).sigmoid().tolist()
+    preds[k] = [[df.iloc[i]['item_id'], prob] for i, prob in enumerate(preds[k])]
     preds[k] = sorted(preds[k], key=lambda x: -x[1])[:10]
 
+
 preds = pd.DataFrame(preds).T.reset_index()
-preds = preds.rename(columns={"index": "username"})
+preds = preds.rename(columns={'index': 'username'})
 cols = list(range(10))
-preds["story_id"] = preds[cols].apply(lambda x: x.tolist(), axis=1)
+preds['story_id'] = preds[cols].apply(lambda x: x.tolist(), axis=1)
 preds = preds.drop(cols, axis=1)
-preds = preds.explode("story_id").reset_index(drop=True)
-preds["score"] = preds["story_id"].apply(lambda x: x[1])
-preds["story_id"] = preds["story_id"].apply(lambda x: x[0])
+preds = preds.explode('story_id').reset_index(drop=True)
+preds['score'] = preds['story_id'].apply(lambda x: x[1])
+preds['story_id'] = preds['story_id'].apply(lambda x: x[0])
 
 
-# In[48]:
+preds.to_csv('data/new_stories_user_pred.tsv', sep="\t", header=True, index=False)
 
-
-preds.to_csv("data/new_stories_user_pred.tsv", sep="\t", header=True, index=False)
-
-with open("data/new_stories_user_pred.pkl", "wb") as fp:
+with open('data/new_stories_user_pred.pkl', 'wb') as fp:
     pickle.dump(preds, fp)
-
-
-# In[ ]:
-
-
-# In[ ]:
-
-
-# In[ ]:
-
-
-# In[ ]:
-
-
-# In[ ]:
