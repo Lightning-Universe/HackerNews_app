@@ -10,7 +10,6 @@ from config import HACKERNEWS_TOPICS_DATA, HACKERNEWS_USER_DATA
 
 
 def user_welcome(state: AppState):
-    print(requests.get(HACKERNEWS_USER_DATA))
     users = [""] + list(requests.get(HACKERNEWS_USER_DATA).json().keys())
     if not state.username:
         st.title("👋 Welcome to HackerRec!")
