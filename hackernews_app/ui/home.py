@@ -11,14 +11,24 @@ from config import HACKERNEWS_TOPICS_DATA, HACKERNEWS_USER_DATA
 
 def user_welcome(state: AppState):
     users = [""] + list(requests.get(HACKERNEWS_USER_DATA).json().keys())
+    intro, recommedations = st.columns(2)
     if not state.username:
-        st.title("👋 Welcome to HackerRec!")
-        st.subheader("Personalized Hackernews stories for you ⚡️")
-        state.username = st.text_input("Enter username", users)
+        intro.title("👋 Welcome to HackerRec!")
+        intro.subheader("Personalized HackerNews stories for you ⚡️")
+        state.username = intro.text_input("Enter username")
+        recommedations.image("visuals/hn.jpeg", width=300)
+    elif state.username is not None and state.username not in users:
+        intro.subheader("Oops! ")
+        intro.error(f"Incorrect username: {state.username}. Select any one of these users: {users}")
+        if intro.button("Want to try a different username?"):
+            state.username = None
+        recommedations.image("visuals/hn.jpeg", width=300)
     else:
-        st.title(f"👋 Hey {state.username}!")
-        st.subheader("⚡ Here are the personalized HackerNews stories for you ⚡️")
-        state.username = st.text_input("Enter username", users)
+        intro.title(f"👋 Hey {state.username}!")
+        intro.subheader("⚡ Here are the personalized HackerNews stories for you ⚡️")
+        if intro.button("Change username?"):
+            state.username = None
+
 
 
 def get_story_data(username: str):
@@ -70,7 +80,7 @@ def recommendations(state: AppState):
 
 def home_ui(lightning_app_state):
     user_welcome(lightning_app_state)
-    recommendations(lightning_app_state)
+    # recommendations(lightning_app_state)
 
 
 class HackerNewsUI(L.LightningFlow):
