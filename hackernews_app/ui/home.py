@@ -16,7 +16,7 @@ def user_welcome(state: AppState):
     if not state.username:
         intro.title("👋 Welcome to HackerRec!")
         intro.subheader("Personalized HackerNews stories for you based on your favorites ⚡️")
-        state.username = intro.text_input("Username", placeholder = 'Enter your Hackernews username')
+        state.username = intro.text_input("Username", placeholder = 'Enter your HackerNews username')
     elif state.username is not None and state.username not in users:
         intro.subheader("Oops! :eyes:")
         intro.error(f"Incorrect username: {state.username}. Select any one of these users: {users}")
