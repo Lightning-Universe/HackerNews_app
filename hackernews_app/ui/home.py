@@ -18,8 +18,7 @@ def user_welcome(state: AppState):
         state.username = st.text_input("Enter username", users)
     else:
         st.title(f"👋 Hey {state.username}!")
-        st.subheader("⚡ Here are the personalized Hackernews stories "
-                     "for you ⚡️")
+        st.subheader("⚡ Here are the personalized HackerNews stories for you ⚡️")
         state.username = st.text_input("Enter username", users)
 
 
