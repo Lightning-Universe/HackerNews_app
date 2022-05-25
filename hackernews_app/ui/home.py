@@ -64,7 +64,7 @@ def recommendations(state: AppState):
     df = get_story_data(state.username)
     unique_categories = df["Category"].unique()
 
-    options = st.multiselect("What are you most interested in?", unique_categories)
+    options = st.multiselect("What are you interested in?", unique_categories)
 
     if len(options) > 0:
         df = df.loc[df.apply(lambda x: x.Category in options, axis=1)]
