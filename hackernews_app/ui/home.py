@@ -102,7 +102,7 @@ def home_ui(lightning_app_state):
         st.session_state["rerender_home_page"] = False
     if "user_status" not in st.session_state:
         st.session_state["user_status"] = lightning_app_state.user_status
-    if "base_url" not in st.session_state:
+    if "base_url" not in st.session_state or lightning_app_state.server_one.base_url != st.session_state.base_url:
         st.session_state["base_url"] = lightning_app_state.server_one.base_url
 
     st.set_page_config(page_title="HackerNews App", page_icon="⚡️", layout="centered")
