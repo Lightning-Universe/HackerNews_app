@@ -18,12 +18,12 @@ class LightningAppTestInt(LightningTestApp):
         f = io.StringIO()
         with redirect_stdout(f):
             super().run_once()
-        out = f.getvalue()
+        # out = f.getvalue()
         # assert out == "hello from component A\nhello from component B\n"
         return True
 
 
-def test_research_app():
+def test_hackernews_app():
     cwd = os.getcwd()
     cwd = os.path.join(cwd, "app.py")
     command_line = [
