@@ -10,7 +10,7 @@ class FastAPIWork(LightningWork):
         super().__init__(run_once=True)
         self.module = module
         self.api_object = api_object
-        self.is_running = False
+        self._is_running = False
         self._process = None
         self.url = self._future_url # TODO: hack
 
@@ -38,4 +38,4 @@ class FastAPIWork(LightningWork):
 
         resp = requests.get(f"{self._url}/healthz")
         if resp.status_code == 200:
-            self.is_running = True
+            self._is_running = True
