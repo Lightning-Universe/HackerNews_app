@@ -22,7 +22,7 @@ def user_welcome():
         st.session_state.rerender_welcome = True
     elif (not st.session_state.user_status) and st.session_state.username and not st.session_state.rerender_welcome:
         intro.subheader("Oops! :eyes:")
-        intro.error(f"Could not find any recommendations for {st.session_state.username}. The user either do not exist or does not have any favorite.")
+        intro.error(f"Could not find any recommendations for {st.session_state.username}. The user either does not exist or does not have any favorites.")
         if intro.button("Want to try a different username?"):
             st.session_state.username = None
             st.session_state.user_status = False
