@@ -22,7 +22,7 @@ def user_welcome():
         st.session_state.rerender_welcome = True
     elif (not st.session_state.user_status) and st.session_state.username and not st.session_state.rerender_welcome:
         intro.subheader("Oops! :eyes:")
-        intro.error(f"Could not find any recommendations for {st.session_state.username}.")
+        intro.error(f"Could not find any recommendations for {st.session_state.username}. The user either do not exist or does not have any favorite.")
         if intro.button("Want to try a different username?"):
             st.session_state.username = None
             st.session_state.user_status = False
@@ -77,7 +77,7 @@ def recommendations(state: AppState):
 
     unique_categories = df["Category"].unique()
 
-    options = st.multiselect("What are you interested in?", unique_categories)
+    options = st.multiselect("Filter by categories of interest", unique_categories)
 
     if len(options) > 0:
         df = df.loc[df["Category"].isin(options)]
