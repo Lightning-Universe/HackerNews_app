@@ -16,11 +16,10 @@ def user_welcome():
     if not st.session_state.username:
         intro.title("👋 Welcome to HackerRec!")
         intro.subheader("Personalized HackerNews stories for you based on your favorites ⚡️")
-        st.session_state.username = intro.text_input(
-            "Username", placeholder="Enter your HackerNews username (AlexClay)"
-        )
-        st.session_state.rerender_welcome = True
-    elif (not st.session_state.user_status) and st.session_state.username and not st.session_state.rerender_welcome:
+        username = intro.text_input("Username", placeholder="Enter your HackerNews username (AlexClay)")
+        if username:
+            st.session_state.username = username
+    elif (not st.session_state.user_status) and st.session_state.username:
         intro.subheader("Oops! :eyes:")
         intro.error(f"Could not find any recommendations for {st.session_state.username}.")
         if intro.button("Want to try a different username?"):
@@ -35,11 +34,9 @@ def user_welcome():
 
     if _prior_username != st.session_state.username:
         st.experimental_rerun()
-    else:
-        st.session_state.rerender_welcome = False
 
 
-@st.experimental_memo(show_spinner=False)
+# @st.experimental_memo(show_spinner=False)
 def get_user_recommendations(username: str, base_url: str):
 
     prediction = requests.post(
@@ -96,18 +93,17 @@ def recommendations(state: AppState):
 
 
 def home_ui(lightning_app_state):
+    st.set_page_config(page_title="HackerNews App", page_icon="⚡️", layout="centered")
 
     if "session_id" not in st.session_state:
-        st.session_state["session_id"] = uuid.uuid1().__str__()
+        st.session_state["session_id"] = uuid.uuid1().hex
     if "username" not in st.session_state:
         st.session_state["username"] = None
-    if "rerender_home_page" not in st.session_state:
-        st.session_state["rerender_home_page"] = False
     if "user_status" not in st.session_state:
-        st.session_state["user_status"] = lightning_app_state.user_status
+        st.session_state["user_status"] = "fdgdfg"
 
-    st.set_page_config(page_title="HackerNews App", page_icon="⚡️", layout="centered")
+    st.write(st.session_state)
     user_welcome()
     recommendations(lightning_app_state)
-
-    lightning_app_state.user_status = st.session_state.user_status
+    st.write(st.session_state)
+    # lightning_app_state.user_status = st.session_state.user_status
