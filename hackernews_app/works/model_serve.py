@@ -12,7 +12,7 @@ class FastAPIWork(LightningWork):
         self.api_object = api_object
         self.is_running = False
         self._process = None
-        self.url = self._future_url
+        self.url = self._future_url # TODO: hack
 
     def run(self, kill=False):
         if kill:
