@@ -16,7 +16,7 @@ ______________________________________________________________________
 [![PyPI Status](https://badge.fury.io/py/hackernews-app.svg)](https://badge.fury.io/py/hackernews-app)
 [![PyPI Status](https://static.pepy.tech/badge/random)](https://pepy.tech/project/hackernews-app)
 [![Slack](https://img.shields.io/badge/slack-chat-green.svg?logo=slack)](https://join.slack.com/t/pytorch-lightning/shared_invite/zt-pw5v393p-qRaDgEk24~EjiZNBpSQFgQ)
-[![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/PytorchLightning/jax-lightning/blob/master/LICENSE)
+[![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/PytorchLightning/hackernews-app/blob/master/LICENSE)
 
 ______________________________________________________________________
 
