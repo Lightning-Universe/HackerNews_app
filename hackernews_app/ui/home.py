@@ -17,7 +17,7 @@ def user_welcome():
         intro.title("👋 Welcome to HackerRec!")
         intro.subheader("Personalized HackerNews stories for you based on your favorites ⚡️")
         st.session_state.username = intro.text_input(
-            "Username", placeholder="Enter your HackerNews username (AlexClay)"
+            "Username", placeholder="Enter your HackerNews username (eg. AlexClay)"
         )
         st.session_state.rerender_welcome = True
     elif (not st.session_state.user_status) and st.session_state.username and not st.session_state.rerender_welcome:
