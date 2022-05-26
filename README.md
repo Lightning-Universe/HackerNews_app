@@ -2,7 +2,7 @@
 
 <img src="visuals/hn_logo.png" width="300px">
 
-**[Hackernews](https://news.ycombinator.com/news) Stories Recommendations Based on Your Favorites :rocket:**
+**[HackerNews](https://news.ycombinator.com/news) Stories Recommendations Based on Your Favorites :rocket:**
 
 ______________________________________________________________________
 
@@ -31,6 +31,7 @@ conda activate hackernews_app
 git clone https://github.com/PyTorchLightning/hackernews-app.git
 cd hackernews-app
 pip install -r requirements.txt
+pip install -e .
 ```
 
 ## Getting Started
