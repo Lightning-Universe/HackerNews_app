@@ -10,12 +10,13 @@ def user_welcome():
 
     _prior_username = st.session_state.username
 
-    intro, logo = st.columns(2)
+    st.image("visuals/hn.png", width=704)
+    intro = st.container()
 
     if not st.session_state.username:
         intro.title("👋 Welcome to HackerRec!")
-        intro.subheader("Personalized HackerNews stories for you ⚡️")
-        st.session_state.username = intro.text_input("Enter username")
+        intro.subheader("Personalized HackerNews stories for you based on your favorites ⚡️")
+        st.session_state.username = intro.text_input("Username", placeholder = 'Enter your HackerNews username')
         st.session_state.rerender_welcome = True
     elif (not st.session_state.user_status) and st.session_state.username and not st.session_state.rerender_welcome:
         intro.subheader("Oops! :eyes:")
@@ -26,7 +27,7 @@ def user_welcome():
     else:
         intro.title(f"👋 Hey {st.session_state.username}!")
         intro.subheader("Here are the personalized HackerNews stories for you! ⚡️")
-        if intro.button("Change username?"):
+        if intro.button("Use a different username"):
             st.session_state.username = None
             st.session_state.user_status = False
 
@@ -75,6 +76,7 @@ def recommendations(state: AppState):
     st.session_state.user_status = True
 
     unique_categories = df["Category"].unique()
+    
     options = st.multiselect("What are you interested in?", unique_categories)
 
     if len(options) > 0:
@@ -90,7 +92,7 @@ def recommendations(state: AppState):
     # Inject CSS with Markdown
     st.markdown(hide_table_row_index, unsafe_allow_html=True)
     # st.table(df)
-    st.write(df.to_html(escape=False, index=False), unsafe_allow_html=True)
+    st.write(df.to_html(escape=False, index=False, justify='center'), unsafe_allow_html=True)
 
 
 def home_ui(lightning_app_state):
