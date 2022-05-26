@@ -1,42 +1,33 @@
-import uuid
-
 import pandas as pd
 import requests
 import streamlit as st
 from lightning.utilities.state import AppState
 
 
-def user_welcome():
-
-    _prior_username = st.session_state.username
-
+def user_welcome(state):
     st.image("visuals/hn.png", width=704)
     intro = st.container()
 
-    if not st.session_state.username:
+    if not state.username:
         intro.title("👋 Welcome to HackerRec!")
         intro.subheader("Personalized HackerNews stories for you based on your favorites ⚡️")
         username = intro.text_input("Username", placeholder="Enter your HackerNews username (AlexClay)")
-        if username:
-            st.session_state.username = username
-    elif (not st.session_state.user_status) and st.session_state.username:
+        state.username = username
+    elif (not state.user_status) and state.username:
         intro.subheader("Oops! :eyes:")
-        intro.error(f"Could not find any recommendations for {st.session_state.username}.")
+        intro.error(f"Could not find any recommendations for {state.username}.")
         if intro.button("Want to try a different username?"):
-            st.session_state.username = None
-            st.session_state.user_status = False
+            state.username = None
+            state.user_status = False
     else:
-        intro.title(f"👋 Hey {st.session_state.username}!")
+        intro.title(f"👋 Hey {state.username}!")
         intro.subheader("Here are the personalized HackerNews stories for you! ⚡️")
         if intro.button("Use a different username"):
-            st.session_state.username = None
-            st.session_state.user_status = False
-
-    if _prior_username != st.session_state.username:
-        st.experimental_rerun()
+            state.username = None
+            state.user_status = False
 
 
-# @st.experimental_memo(show_spinner=False)
+@st.experimental_memo(show_spinner=False)
 def get_user_recommendations(username: str, base_url: str):
 
     prediction = requests.post(
@@ -61,16 +52,16 @@ def get_user_recommendations(username: str, base_url: str):
 
 
 def recommendations(state: AppState):
-    if not st.session_state.username:
+    if not state.username:
         return
 
-    df = get_user_recommendations(st.session_state.username, state.server_one.url)
+    df = get_user_recommendations(state.username, state.server_one.url)
 
     if df is None:
-        st.session_state.user_status = False
+        state.user_status = False
         return
 
-    st.session_state.user_status = True
+    state.user_status = True
 
     unique_categories = df["Category"].unique()
 
@@ -95,15 +86,5 @@ def recommendations(state: AppState):
 def home_ui(lightning_app_state):
     st.set_page_config(page_title="HackerNews App", page_icon="⚡️", layout="centered")
 
-    if "session_id" not in st.session_state:
-        st.session_state["session_id"] = uuid.uuid1().hex
-    if "username" not in st.session_state:
-        st.session_state["username"] = None
-    if "user_status" not in st.session_state:
-        st.session_state["user_status"] = "fdgdfg"
-
-    st.write(st.session_state)
-    user_welcome()
+    user_welcome(lightning_app_state)
     recommendations(lightning_app_state)
-    st.write(st.session_state)
-    # lightning_app_state.user_status = st.session_state.user_status
