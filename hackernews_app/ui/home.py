@@ -40,6 +40,7 @@ def user_welcome():
 
 @st.experimental_memo(show_spinner=False)
 def get_user_recommendations(username: str, base_url: str):
+
     prediction = requests.post(
         f"{base_url}/api/recommend",
         headers={"X-Token": "hailhydra"},
@@ -61,11 +62,11 @@ def get_user_recommendations(username: str, base_url: str):
     return df
 
 
-def recommendations():
+def recommendations(state: AppState):
     if not st.session_state.username:
         return
 
-    df = get_user_recommendations(st.session_state.username, st.session_state.base_url)
+    df = get_user_recommendations(st.session_state.username, state.server_one.url)
 
     if df is None:
         st.session_state.user_status = False
@@ -102,11 +103,9 @@ def home_ui(lightning_app_state):
         st.session_state["rerender_home_page"] = False
     if "user_status" not in st.session_state:
         st.session_state["user_status"] = lightning_app_state.user_status
-    if "base_url" not in st.session_state or lightning_app_state.server_one.base_url != st.session_state.base_url:
-        st.session_state["base_url"] = lightning_app_state.server_one.base_url
 
     st.set_page_config(page_title="HackerNews App", page_icon="⚡️", layout="centered")
     user_welcome()
-    recommendations()
+    recommendations(lightning_app_state)
 
     lightning_app_state.user_status = st.session_state.user_status

@@ -6,15 +6,13 @@ import requests
 from lightning import LightningWork
 
 class FastAPIWork(LightningWork):
-    def __init__(self, module, api_object, host="localhost", port=8000):
+    def __init__(self, module, api_object):
         super().__init__(run_once=True)
         self.module = module
         self.api_object = api_object
-        self._host = host
-        self._port = port
         self.is_running = False
         self._process = None
-        self.base_url = f"http://{self._host}:{self._port}"
+        self.url = self._future_url
 
     def run(self, kill=False):
         if kill:
@@ -25,11 +23,19 @@ class FastAPIWork(LightningWork):
                 "uvicorn",
                 f"{self.module}:{self.api_object}",
                 "--port",
-                str(self._port),
+                str(self.port),
+                "--host",
+                self.host
             ]
-            self._process = subprocess.Popen(command)
+            self._process = subprocess.Popen(command).wait()
+
             time.sleep(5)
 
-        resp = requests.get(f"{self.base_url}/healthz")
+        if self.url is None:
+            return
+
+        self.url = self._url
+
+        resp = requests.get(f"{self._url}/healthz")
         if resp.status_code == 200:
             self.is_running = True
