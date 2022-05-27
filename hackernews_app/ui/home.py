@@ -6,7 +6,7 @@ import streamlit as st
 from lightning.utilities.state import AppState
 
 
-def user_welcome():
+def user_welcome(state: AppState):
 
     _prior_username = st.session_state.username
 
@@ -20,18 +20,22 @@ def user_welcome():
             "Username", placeholder="Enter your HackerNews username (eg. AlexClay)"
         )
         st.session_state.rerender_welcome = True
-    elif (not st.session_state.user_status) and st.session_state.username and not st.session_state.rerender_welcome:
-        intro.subheader("Oops! :eyes:")
-        intro.error(f"Could not find any recommendations for {st.session_state.username}. The user either does not exist or does not have any favorites.")
-        if intro.button("Want to try a different username?"):
-            st.session_state.username = None
-            st.session_state.user_status = False
     else:
-        intro.title(f"👋 Hey {st.session_state.username}!")
-        intro.subheader("Here are the personalized HackerNews stories for you! ⚡️")
-        if intro.button("Use a different username"):
-            st.session_state.username = None
-            st.session_state.user_status = False
+        recommendations(state)
+        if (not st.session_state.user_status) and st.session_state.username:
+            intro.subheader("Oops! :eyes:")
+            intro.error(
+                f"Could not find any recommendations for {st.session_state.username}. The user either does not exist or does not have any favorites."
+            )
+            if intro.button("Want to try a different username?"):
+                st.session_state.username = None
+                st.session_state.user_status = False
+        else:
+            intro.title(f"👋 Hey {st.session_state.username}!")
+            intro.subheader("Here are the personalized HackerNews stories for you! ⚡️")
+            if intro.button("Use a different username"):
+                st.session_state.username = None
+                st.session_state.user_status = False
 
     if _prior_username != st.session_state.username:
         st.experimental_rerun()
@@ -97,6 +101,8 @@ def recommendations(state: AppState):
 
 def home_ui(lightning_app_state):
 
+    st.set_page_config(page_title="HackerNews App", page_icon="⚡️", layout="centered")
+
     if "session_id" not in st.session_state:
         st.session_state["session_id"] = uuid.uuid1().__str__()
     if "username" not in st.session_state:
@@ -104,10 +110,6 @@ def home_ui(lightning_app_state):
     if "rerender_home_page" not in st.session_state:
         st.session_state["rerender_home_page"] = False
     if "user_status" not in st.session_state:
-        st.session_state["user_status"] = lightning_app_state.user_status
+        st.session_state["user_status"] = False
 
-    st.set_page_config(page_title="HackerNews App", page_icon="⚡️", layout="centered")
-    user_welcome()
-    recommendations(lightning_app_state)
-
-    lightning_app_state.user_status = st.session_state.user_status
+    user_welcome(lightning_app_state)
