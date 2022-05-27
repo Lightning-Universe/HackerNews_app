@@ -19,13 +19,13 @@ def user_welcome(state: AppState):
         st.session_state.username = intro.text_input(
             "Username", placeholder="Enter your HackerNews username (eg. AlexClay)"
         )
-        st.session_state.rerender_welcome = True
     else:
         recommendations(state)
         if (not st.session_state.user_status) and st.session_state.username:
             intro.subheader("Oops! :eyes:")
             intro.error(
-                f"Could not find any recommendations for {st.session_state.username}. The user either does not exist or does not have any favorites."
+                f"Could not find any recommendations for **{st.session_state.username}**."
+                " The user either does not exist or does not have any favorites."
             )
             if intro.button("Want to try a different username?"):
                 st.session_state.username = None
@@ -39,8 +39,6 @@ def user_welcome(state: AppState):
 
     if _prior_username != st.session_state.username:
         st.experimental_rerun()
-    else:
-        st.session_state.rerender_welcome = False
 
 
 @st.experimental_memo(show_spinner=False)
@@ -104,11 +102,9 @@ def home_ui(lightning_app_state):
     st.set_page_config(page_title="HackerNews App", page_icon="⚡️", layout="centered")
 
     if "session_id" not in st.session_state:
-        st.session_state["session_id"] = uuid.uuid1().__str__()
+        st.session_state["session_id"] = uuid.uuid1().hex
     if "username" not in st.session_state:
         st.session_state["username"] = None
-    if "rerender_home_page" not in st.session_state:
-        st.session_state["rerender_home_page"] = False
     if "user_status" not in st.session_state:
         st.session_state["user_status"] = False
 
