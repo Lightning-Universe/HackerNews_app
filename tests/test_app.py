@@ -18,8 +18,8 @@ class LightningAppTestInt(LightningTestApp):
         f = io.StringIO()
         with redirect_stdout(f):
             super().run_once()
-        # out = f.getvalue()
-        # assert out == "hello from component A\nhello from component B\n"
+        out = f.getvalue()
+        assert "⚡ Lightning HackerNews App! ⚡\n" == out
         return True
 
 
