@@ -9,6 +9,7 @@ class HackerNewsDataProcesses(L.LightningFlow):
         self.model_service = ModelServeFlow()
 
     def run(self):
+        print("⚡ Lightning HackerNews App! ⚡")
         self.model_service.run()
 
         while self.model_service.server_one is False:
