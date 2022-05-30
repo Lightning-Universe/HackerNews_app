@@ -1,7 +1,9 @@
+import time
+
 import lightning as L
 
 from hackernews_app.flows.model_serve import ModelServeFlow
-import time
+
 
 class HackerNewsDataProcesses(L.LightningFlow):
     def __init__(self):
@@ -11,11 +13,12 @@ class HackerNewsDataProcesses(L.LightningFlow):
     def run(self):
         self.model_service.run()
 
-        while self.model_service.server_one is False:
+        while not self.model_service.server_one.is_running:
             time.sleep(5)
 
     def configure_layout(self):
-        return {"name": "Home", "content": self.model_service}
+        if self.model_service.server_one.is_running:
+            return {"name": "Home", "content": self.model_service}
 
 
 if __name__ == "__main__":

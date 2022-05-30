@@ -13,8 +13,7 @@ class ModelServeFlow(L.LightningFlow):
         self.server_one = FastAPIWork(module="fastapi_app", api_object="app")
 
     def run(self):
-        if not self.server_one.has_started:
-            self.server_one.run()
+        self.server_one.run()
 
     def configure_layout(self):
         return L.frontend.StreamlitFrontend(render_fn=home_ui)

@@ -1,9 +1,9 @@
 import subprocess
 import time
-import random
 
 import requests
 from lightning import LightningWork
+
 
 class FastAPIWork(LightningWork):
     def __init__(self, module, api_object):
@@ -12,21 +12,18 @@ class FastAPIWork(LightningWork):
         self.api_object = api_object
         self._is_running = False
         self._process = None
-        self.url = self._future_url # TODO: hack
+        self.url = self._future_url  # TODO: hack
+
+    @property
+    def is_running(self):
+        return self._is_running
 
     def run(self, kill=False):
         if kill:
             self._process.terminate()
 
         if self._process is None:
-            command = [
-                "uvicorn",
-                f"{self.module}:{self.api_object}",
-                "--port",
-                str(self.port),
-                "--host",
-                self.host
-            ]
+            command = ["uvicorn", f"{self.module}:{self.api_object}", "--port", str(self.port), "--host", self.host]
             self._process = subprocess.Popen(command).wait()
 
             time.sleep(5)
