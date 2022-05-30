@@ -7,7 +7,7 @@ class BaseDataConfig:
 
 
 class BaseConfig:
-    """General configuration."""
+    """General configuratios."""
 
     num_epochs = 2
     num_batches_show_loss = 100  # Number of batchs to show loss
@@ -25,12 +25,7 @@ class BaseConfig:
     negative_sampling_ratio = 2  # K
     dropout_probability = 0.2
     # Modify the following by the output of `src/dataprocess.py`
-    num_words = 1 + 70975
-    num_categories = 1 + 274
-    num_entities = 1 + 12957
-    num_users = 1 + 50000
     word_embedding_dim = 300
-    category_embedding_dim = 100
     # Modify the following only if you use another dataset
     entity_embedding_dim = 100
     # For additive attention
@@ -38,8 +33,6 @@ class BaseConfig:
 
 
 class TANRConfig(BaseConfig, BaseDataConfig):
-    dataset_attributes = {"news": ["category", "title"], "record": []}
     # For CNN
     num_filters = 300
     window_size = 3
-    topic_classification_loss_weight = 0.1
