@@ -12,6 +12,7 @@ class TANRModule(LightningModule):
         self.config = config
         self.model = TANR(config, pretrained_word_embedding=pretrained_word_embedding)
 
+        # TODO: Add NDCG metric tracking
         metrics = MetricCollection(
             {
                 "acc": Accuracy(),
