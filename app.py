@@ -17,14 +17,14 @@ class HackerNews(L.LightningFlow):
         self.model_service.run()
 
         # TODO: check why this doesn't work in fastapi (@rohitgr7)
-        if not self.model_service.server_one.is_running:
+        if not self.model_service.server_one.is_app_running:
             while requests.get(f"{self.model_service.server_one.url}/healthz").status_code != 200:
                 time.sleep(1)
 
-            self.model_service.server_one.is_running = True
+            self.model_service.server_one.is_app_running = True
 
     def configure_layout(self):
-        if self.model_service.server_one.is_running:
+        if self.model_service.server_one.is_app_running:
             return {"name": "Home", "content": self.model_service}
         else:
             return {"name": "Home", "content": self.app_starting}
