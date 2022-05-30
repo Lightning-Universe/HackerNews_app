@@ -1,9 +1,8 @@
 import subprocess
-import time
-import random
 
 import requests
 from lightning import LightningWork
+
 
 class FastAPIWork(LightningWork):
     def __init__(self, module, api_object):
@@ -12,7 +11,7 @@ class FastAPIWork(LightningWork):
         self.api_object = api_object
         self._is_running = False
         self._process = None
-        self.url = self._future_url # TODO: hack
+        self.url = self._future_url  # TODO: hack
 
     def run(self, kill=False):
         if kill:
@@ -39,3 +38,6 @@ class FastAPIWork(LightningWork):
         resp = requests.get(f"{self._url}/healthz")
         if resp.status_code == 200:
             self._is_running = True
+
+    def health(self):
+        return requests.get(f"http://{self.host}:{self.port}/healthz")
