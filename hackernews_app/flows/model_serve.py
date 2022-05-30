@@ -1,7 +1,7 @@
 import lightning as L
 
 from hackernews_app.ui.home import home_ui
-from hackernews_app.works.model_serve import FastAPIWork
+from hackernews_app.works.fastapi import FastAPIWork
 
 
 class ModelServeFlow(L.LightningFlow):
