@@ -18,14 +18,7 @@ class FastAPIWork(LightningWork):
             self._process.terminate()
 
         if self._process is None:
-            command = [
-                "uvicorn",
-                f"{self.module}:{self.api_object}",
-                "--port",
-                str(self.port),
-                "--host",
-                self.host
-            ]
+            command = ["uvicorn", f"{self.module}:{self.api_object}", "--port", str(self.port), "--host", self.host]
             self._process = subprocess.Popen(command).wait()
 
             time.sleep(5)
