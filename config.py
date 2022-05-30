@@ -7,7 +7,7 @@ class BaseDataConfig:
 
 
 class BaseConfig:
-    """General configurations appiled to all models."""
+    """General configuration."""
 
     num_epochs = 2
     num_batches_show_loss = 100  # Number of batchs to show loss

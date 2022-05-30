@@ -1,7 +1,9 @@
+import time
+
 import lightning as L
 
 from hackernews_app.flows.model_serve import ModelServeFlow
-import time
+
 
 class HackerNewsDataProcesses(L.LightningFlow):
     def __init__(self):
@@ -19,8 +21,4 @@ class HackerNewsDataProcesses(L.LightningFlow):
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
     app = L.LightningApp(HackerNewsDataProcesses())
-=======
-    app = L.LightningApp(HackerNewsApp())
->>>>>>> 72323e5 (formating)
