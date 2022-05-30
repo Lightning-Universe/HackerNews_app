@@ -1,7 +1,9 @@
+import time
+
 import lightning as L
 
 from hackernews_app.flows.model_serve import ModelServeFlow
-import time
+
 
 class HackerNewsDataProcesses(L.LightningFlow):
     def __init__(self):

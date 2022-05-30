@@ -1,13 +1,11 @@
 import torch
-from additive import AdditiveAttention
+from models.additive import AdditiveAttention
 
 
 class UserEncoder(torch.nn.Module):
     def __init__(self, config):
         super().__init__()
-        self.additive_attention = AdditiveAttention(
-            config.query_vector_dim, config.num_filters
-        )
+        self.additive_attention = AdditiveAttention(config.query_vector_dim, config.num_filters)
 
     def forward(self, clicked_story_vector):
         """
