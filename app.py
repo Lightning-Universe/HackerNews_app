@@ -1,7 +1,10 @@
+import os
+import time
+
 import lightning as L
 
 from hackernews_app.flows.model_serve import ModelServeFlow
-import time
+
 
 class HackerNewsDataProcesses(L.LightningFlow):
     def __init__(self):
@@ -9,7 +12,8 @@ class HackerNewsDataProcesses(L.LightningFlow):
         self.model_service = ModelServeFlow()
 
     def run(self):
-        print("⚡ Lightning HackerNews App! ⚡")
+        if os.environ.get("LAI_TEST"):
+            print("⚡ Lightning HackerNews App! ⚡")
         self.model_service.run()
 
         while self.model_service.server_one is False:
