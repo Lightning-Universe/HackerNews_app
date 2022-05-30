@@ -28,11 +28,11 @@ class FastAPIWork(LightningWork):
 
             time.sleep(5)
 
-        if self.url is None:
-            return
+            if self.url is None:
+                return
 
-        self.url = self._url
+            self.url = self._url
 
-        resp = requests.get(f"{self._url}/healthz")
-        if resp.status_code == 200:
-            self._is_running = True
+            resp = requests.get(f"{self.url}/healthz")
+            if resp.status_code == 200:
+                self._is_running = True
