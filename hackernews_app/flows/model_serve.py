@@ -11,8 +11,6 @@ class ModelServeFlow(L.LightningFlow):
         super().__init__(*args, **kwargs)
 
         self.server_one = FastAPIWork(module="fastapi_app", api_object="app")
-        self.username = None
-        self.user_status = False
 
     def run(self):
         if not self.server_one.has_started:
