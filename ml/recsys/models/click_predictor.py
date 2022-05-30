@@ -24,6 +24,4 @@ class DNNClickPredictor(torch.nn.Module):
             (shape): batch_size
         """
         # batch_size
-        return self.dnn(
-            torch.cat((candidate_story_vector, user_vector), dim=1)
-        ).squeeze(dim=1)
+        return self.dnn(torch.cat((candidate_story_vector, user_vector), dim=1)).squeeze(dim=1)
