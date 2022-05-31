@@ -1,23 +1,20 @@
-import time
-import json
 import datetime as dt
+import json
 import logging
 import pickle
+import time
+
 import lightning as L
-from hackernews_app.works.hacker_news import HackerNewsGetItem, HackerNewsSubscriber, HackerNewsRequestAPI
 
 from hackernews_app.api.hackernews import constants
+from hackernews_app.works.hacker_news import HackerNewsGetItem, HackerNewsRequestAPI, HackerNewsSubscriber
 from lightning_gcp.bigquery import BigQueryWork
-
 
 logging.basicConfig(level=logging.INFO)
 
 
-
 class HackerNewsLiveStories(L.LightningFlow):
-    """ This flow runs endlessly
-
-    """
+    """This flow runs endlessly."""
 
     def __init__(
         self,
@@ -35,7 +32,7 @@ class HackerNewsLiveStories(L.LightningFlow):
             project_id=project_id,
             topic_name=self.item_getter.topic_name,
             subscription="hacker-news-items-subscription",
-            run_once=False
+            run_once=False,
         )
         self.bq_inserter = BigQueryWork(run_once=False)
         self.is_bq_inserting = False
@@ -46,24 +43,24 @@ class HackerNewsLiveStories(L.LightningFlow):
             logging.info(self.item_getter.max_item)
             logging.info(self.is_bq_inserting)
             self.is_bq_inserting = True
+
+            json_rows = [
+                {**json.loads(data), **{"created_at": dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}}
+                for data in self.item_getter.data
+            ]
+
             self.bq_inserter.run(
                 query=None,
                 project=self.project_id,
                 location=self.location,
                 credentials=credentials,
-                json_rows=[
-                    {
-                        **json.loads(data),
-                        **{"created_at": dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}
-                    }
-                    for data in self.item_getter.data
-                ],
-                table="hacker_news.stories"
+                json_rows=json_rows,
+                table="hacker_news.stories",
             )
             # TODO: Comeback to enabule the subscriber. There is an issue with passing/receiving data from pubsub.
             #       It is encoding the byte representation as a literal string. i.e. 'foo bar' gets received by
             #       the subscriber as byte("b'foo bar'") -- creating issues with urls.
-            #self.subscriber.run()
+            # self.subscriber.run()
 
         if self.bq_inserter.has_succeeded and self.is_bq_inserting is True:
             self.is_bq_inserting = False
@@ -87,20 +84,19 @@ class HackerNewsLiveStories(L.LightningFlow):
 
 
 class LastGroupLoader(L.LightningWork):
-
     def __init__(self, *args, **kwargs):
         super().__init__(self, *args, **kwargs)
         self.last_group = None
 
     def run(self, filepath: str):
-        last_group = pickle.load(open(filepath, 'rb'))
+        last_group = pickle.load(open(filepath, "rb"))
         self.last_group = int(last_group.maxvalue.iloc[0]) + 1 if len(last_group) else 1
 
-class HackerNewsHourly(L.LightningFlow):
 
+class HackerNewsHourly(L.LightningFlow):
     def __init__(self):
         super().__init__()
-        self.should_execute = True #TODO: change this to False
+        self.should_execute = True  # TODO: change this to False
 
         # Run one time to get the data we need.
         self.last_group_getter = BigQueryWork(run_once=True)
@@ -110,7 +106,6 @@ class HackerNewsHourly(L.LightningFlow):
         self.api_client = HackerNewsRequestAPI()
         self.inserter = BigQueryWork(run_once=False)
         self.to_insert = True
-
 
     def run(self, project_id, location, credentials):
 
@@ -172,9 +167,7 @@ class HackerNewsHourly(L.LightningFlow):
         if self.inserter.has_succeeded and self.api_client.has_succeeded:
             self.on_after_run()
 
-
     def on_after_run(self):
         self.should_execute = False
         self.to_insert = True
         self.last_group_loader.last_group += 1
-

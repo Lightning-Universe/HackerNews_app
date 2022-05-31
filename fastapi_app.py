@@ -6,7 +6,6 @@ from fastapi import FastAPI, Response, status
 from google.cloud import bigquery
 
 from hackernews_app.contexts.secrets import LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS
-from ml.topic_classification.inference import predict as topic_predict
 
 logging.basicConfig(filename=f".{__name__}.log", format="%(filename)s: %(message)s", level=logging.INFO)
 
@@ -84,8 +83,3 @@ def recommend(data: Dict, response: Response):
         }
 
     return response
-
-
-@app.post("/api/predict_topic", status_code=status.HTTP_200_OK)
-def predict_topics(payload: Dict):
-    return topic_predict(payload["stories"], payload["weights_path"])
