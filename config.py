@@ -1,6 +1,70 @@
 import os
 
 
+class TopicClassificationDataConfig:
+    """Configuration for topic classification data."""
+
+    classes = [
+        "Education",
+        "Business",
+        "Sports",
+        "Technology",
+        "News and Politics",
+        "Lifestyle",
+        "Culture and Arts",
+        "Entertainment",
+    ]
+
+    main_categories = {
+        "Education": ["EDUCATION", "COLLEGE"],
+        "Business": ["BUSINESS", "MONEY"],
+        "Sports": ["SPORTS"],
+        "Technology": ["TECH", "SCIENCE"],
+        "News and Politics": [
+            "POLITICS",
+            "BLACK VOICES",
+            "QUEER VOICES",
+            "LATINO VOICES",
+            "WOMEN",
+            "IMPACT",
+            "RELIGION",
+            "CRIME",
+            "GOOD NEWS",
+            "MEDIA",
+            "WEIRD NEWS",
+            "WORLD NEWS",
+            "THE WORLDPOST",
+            "WORLDPOST",
+        ],
+        "Lifestyle": [
+            "WELLNESS",
+            "TRAVEL",
+            "STYLE & BEAUTY",
+            "PARENTING",
+            "HEALTHY LIVING",
+            "FOOD & DRINK",
+            "HOME & LIVING",
+            "ENVIRONMENT",
+            "PARENTS",
+            "STYLE",
+            "TASTE",
+            "GREEN",
+            "FIFTY",
+        ],
+        "Culture and Arts": ["ARTS & CULTURE", "CULTURE & ARTS", "WEDDINGS", "DIVORCE", "ARTS"],
+        "Entertainment": ["ENTERTAINMENT", "COMEDY"],
+    }
+
+
+class TopicClassificationModelConfig:
+    model_name = "distilbert-base-uncased"
+    max_epochs = 5
+
+
+class TopicClassificationConfig(TopicClassificationModelConfig, TopicClassificationDataConfig):
+    pass
+
+
 class BaseDataConfig:
     least_fav_topic_count = 4
     val_split_pct = 0.2
@@ -32,7 +96,7 @@ class BaseConfig:
     query_vector_dim = 200
 
 
-class TANRConfig(BaseConfig, BaseDataConfig):
+class TANRConfig(BaseConfig, BaseDataConfig, TopicClassificationConfig):
     # For CNN
     num_filters = 300
     window_size = 3

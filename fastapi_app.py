@@ -6,11 +6,11 @@ from fastapi import FastAPI, Response, status
 from google.cloud import bigquery
 
 from hackernews_app.contexts.secrets import LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS
+from ml.topic_classification.inference import predict as topic_predict
 
 logging.basicConfig(filename=f".{__name__}.log", format="%(filename)s: %(message)s", level=logging.INFO)
 
 app = FastAPI()
-topic_classifier = None
 
 BQ_CREDENTIALS = LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS
 BQ_LOCATION = "US"
@@ -86,7 +86,6 @@ def recommend(data: Dict, response: Response):
     return response
 
 
-@app.post("/api/update_topic_classif", status_code=status.HTTP_200_OK)
-def update_topic_classifier(weights_path: Dict):
-    global topic_classifier
-    model = TabularClassifier.load_from_checkpoint(model_path / "model.ckpt")
+@app.post("/api/predict_topic", status_code=status.HTTP_200_OK)
+def predict_topics(payload: Dict):
+    return topic_predict(payload["stories"], payload["weights_path"])
