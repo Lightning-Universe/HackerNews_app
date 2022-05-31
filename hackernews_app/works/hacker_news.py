@@ -92,7 +92,10 @@ class HackerNewsGetItem(L.LightningWork):
             logging.info(f"Found a new item: {data}")
             logging.info(f"The last item retrieved: {self.max_item}")
             self.max_item += 1
+<<<<<<< HEAD
             self.num_stories += 1
+=======
+>>>>>>> 856a496 (update)
 
     def publish(self):
 
