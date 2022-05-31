@@ -6,6 +6,7 @@ from fastapi import FastAPI, Response, status
 from google.cloud import bigquery
 
 from hackernews_app.contexts.secrets import LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS
+from ml.recsys.models.module import TANRModule
 
 logging.basicConfig(filename=f".{__name__}.log", format="%(filename)s: %(message)s", level=logging.INFO)
 
@@ -84,3 +85,9 @@ def recommend(data: Dict, response: Response):
         }
 
     return response
+
+
+@app.post("/api/update_recsys_weights")
+def update_recsys_model(payload: Dict):
+    global model
+    model = TANRModule.load_from_checkpoint(payload["weights_path"])

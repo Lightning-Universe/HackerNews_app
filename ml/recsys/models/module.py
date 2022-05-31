@@ -77,8 +77,8 @@ class TANRModule(LightningModule):
     def get_prediction(self, news_vector, user_vector):
         """
         Args:
-            news_vector: candidate_size, word_embedding_dim
-            user_vector: word_embedding_dim
+            news_vector: candidate_size, num_filters
+            user_vector: num_filters
         Returns:
             click_probability: candidate_size
         """
