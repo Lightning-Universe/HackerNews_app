@@ -2,6 +2,8 @@ import time
 
 import lightning as L
 
+from hackernews_app.contexts.secrets import get_secrets, LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS
+from hackernews_app.flows.hacker_news_live import HackerNewsLiveStories
 from hackernews_app.flows.model_serve import ModelServeFlow
 from hackernews_app.ui.app_starting import AppStarting
 from hackernews_app.works.http import HTTPRequest
@@ -24,9 +26,15 @@ class HackerNews(L.LightningFlow):
         self.app_starting = AppStarting()
         self.model_service = ModelServeFlow()
         self.health_check = HealthCheck(run_once=False)
+        secrets = get_secrets()
+        self.hn_live_stream = HackerNewsLiveStories(
+            secrets["project_id"], topic="hn_stream", location="US", time_interval=5
+        )
 
     def run(self):
         self.model_service.run()
+        self.hn_live_stream.run(LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS)
+
         if self.health_check.is_healthy is False:
             self.health_check.get(f"{self.model_service.server_one.url}/healthz")
             time.sleep(1)
