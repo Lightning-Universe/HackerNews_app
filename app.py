@@ -18,10 +18,17 @@ class HackerNews(L.LightningFlow):
 
         # TODO: check why this doesn't work in fastapi (@rohitgr7)
         if not self.model_service.server_one.is_app_running:
-            while requests.get(f"{self.model_service.server_one.url}/healthz").status_code != 200:
-                time.sleep(1)
-
-            self.model_service.server_one.is_app_running = True
+            server_started = False
+            for _ in range(10):
+                if requests.get(f"{self.model_service.server_one.url}/healthz").status_code != 200:
+                    time.sleep(1)
+                else:
+                    server_started = True
+                    break
+            if server_started:
+                self.model_service.server_one.is_app_running = True
+            else:
+                raise Exception("Could not start FastAPI server.")
 
     def configure_layout(self):
         if self.model_service.server_one.is_app_running:
