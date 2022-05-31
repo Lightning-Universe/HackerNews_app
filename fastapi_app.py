@@ -10,7 +10,6 @@ from hackernews_app.contexts.secrets import LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS
 logging.basicConfig(filename=f".{__name__}.log", format="%(filename)s: %(message)s", level=logging.INFO)
 
 app = FastAPI()
-model = None
 
 BQ_CREDENTIALS = LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS
 BQ_LOCATION = "US"
