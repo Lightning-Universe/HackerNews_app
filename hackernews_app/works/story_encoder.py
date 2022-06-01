@@ -12,4 +12,3 @@ class StoryEncoder(L.LightningWork):
 
     def run(self, stories):
         embeddings = generate_embeddings(stories, self.weights_path)
-        self.embeddings = L.storage.Payload(embeddings)

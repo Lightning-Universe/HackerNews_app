@@ -58,17 +58,9 @@ class HackerNewsLiveStories(L.LightningFlow):
 
             # random stories (remove it)
             stories = [{"title": "Tech published a new article", "id": i} for i in range(5)]
-            story_topics = []
-            story_embeddings = []
             if stories:
-                # self.topic_classifier.run(stories)
-                # story_topics = self.topic_classifier.topics
+                self.topic_classifier.run(stories)
                 self.story_encoder.run(stories)
-                story_embeddings = self.story_encoder.embeddings
-                story_topics = [story for story in story_topics if story["id"] in story_embeddings]
-
-            # story_topics = [{"story_id": story_id, "topic": some_topic}]
-            # embeddings = [{"story_id": story_id, "embeddings": [n1, ....n300]}]
 
             self.bq_inserter.run(
                 query=None,
