@@ -1,12 +1,16 @@
-from lightning import LightningWork
+import lightning as L
 
 from ml.topic_classification.inference import predict as topic_predict
 
 
-class TopicClassification(LightningWork):
+class TopicClassification(L.LightningWork):
     def __init__(self, weights_path):
         super().__init__()
-        self.weights_path = weights_path
+        # TODO: provide proper weights_path (@rohitgr7)
+        self.weights_path = "ml/topic_classification/epoch=4-step=25110.ckpt"
+        self.topics = None
 
-    def run(self, titles):
-        return topic_predict(titles, self.weights_path)
+    def run(self, stories):
+        topics = topic_predict([story["title"] for story in stories], self.weights_path)
+        topics = [{"id": story["id"], "topic": topic} for story, topic in zip(stories, topics)]
+        self.topics = L.storage.Payload(topics)
