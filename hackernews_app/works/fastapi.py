@@ -1,30 +1,19 @@
-import subprocess
-import time
+import lightning as L
+import uvicorn
 
-from lightning import LightningWork
+from hackernews_app.api.fastapi_app import app
 
 
-class FastAPIWork(LightningWork):
-    def __init__(self, module, api_object):
-        super().__init__(run_once=True)
-        self.module = module
-        self.api_object = api_object
+class FastAPIServer(L.LightningWork):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
         self.is_app_running = False
-        self._process = None
-        self.url = self._future_url  # TODO: hack
 
-    def run(self, kill=False):
-        if kill:
-            self._process.terminate()
+        # The url that requests will be made to.
+        self.url = ""
 
-        if self._process is None:
-            command = ["uvicorn", f"{self.module}:{self.api_object}", "--port", str(self.port), "--host", self.host]
-            self._process = subprocess.Popen(command)
-            # self._process = subprocess.Popen(command).wait()
-
-            time.sleep(5)
-
-            if self.url is None:
-                return
-
-            self.url = self._url
+    def run(self):
+        uvicorn.run(app, host=self.host, port=self.port, loop="asyncio")
+        if not self.url:
+            self.url = f"http://{self.host}:{self.port}"
