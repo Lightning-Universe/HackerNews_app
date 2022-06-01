@@ -8,6 +8,8 @@ import lightning as L
 
 from hackernews_app.api.hackernews import constants
 from hackernews_app.works.hacker_news import HackerNewsGetItem, HackerNewsRequestAPI, HackerNewsSubscriber
+from hackernews_app.works.story_encoder import StoryEncoder
+from hackernews_app.works.topic_classification import TopicClassification
 from lightning_gcp.bigquery import BigQueryWork
 
 logging.basicConfig(level=logging.INFO)
@@ -37,6 +39,9 @@ class HackerNewsLiveStories(L.LightningFlow):
         self.bq_inserter = BigQueryWork(run_once=False)
         self.is_bq_inserting = False
 
+        self.topic_classifier = TopicClassification(None)
+        self.story_encoder = StoryEncoder(None)
+
     def run(self, credentials):
 
         if self.item_getter.has_succeeded and self.item_getter.data and self.is_bq_inserting is False:
@@ -48,12 +53,22 @@ class HackerNewsLiveStories(L.LightningFlow):
                 {**json.loads(data), **{"created_at": dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}}
                 for data in self.item_getter.data
             ]
+            stories = [row for row in json_rows if row["type"] == "story" and row["title"] is not None]
+            stories = [{"title": row["title"], "id": row["id"]} for row in stories]
 
-            json_rows = [row for row in json_rows if row["type"] == "story"]
-            story_topics = [{"story_id": story_id, "topic": some_topic}]
-            embeddings = [{"story_id": story_id, "embeddings": [n1, ....n300]}]
+            # random stories (remove it)
+            stories = [{"title": "Tech published a new article", "id": i} for i in range(5)]
+            story_topics = []
+            story_embeddings = []
+            if stories:
+                # self.topic_classifier.run(stories)
+                # story_topics = self.topic_classifier.topics
+                self.story_encoder.run(stories)
+                story_embeddings = self.story_encoder.embeddings
+                story_topics = [story for story in story_topics if story["id"] in story_embeddings]
 
-            breakpoint()
+            # story_topics = [{"story_id": story_id, "topic": some_topic}]
+            # embeddings = [{"story_id": story_id, "embeddings": [n1, ....n300]}]
 
             self.bq_inserter.run(
                 query=None,
@@ -75,8 +90,6 @@ class HackerNewsLiveStories(L.LightningFlow):
 
         if not self.item_getter.has_started:
             self.item_getter.run()
-
-        logging.info(f"getter data: {self.item_getter.data}")
 
         if len(self.subscriber.messages) > 0:
             logging.info(f"subscriber: {self.subscriber.messages}")
@@ -145,7 +158,6 @@ class HackerNewsHourly(L.LightningFlow):
 
         # Get data
         self.api_client.run(constants.HACKERNEWS_TOP_STORIES_ENDPOINT)
-        logging.info(self.api_client.response_data)
 
         if self.api_client.response_data and self.last_group_loader.last_group is not None and self.to_insert:
 
