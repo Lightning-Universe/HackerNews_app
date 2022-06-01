@@ -54,11 +54,13 @@ class HackerNewsGetItem(L.LightningWork):
         super().__init__(*args, **kwargs)
         self.base_url = constants.HACKERNEWS_BASEURL
         self.data = []
-        self.max_item = 31579971  # TODO: hack, replace it with data fetch from BQ (@Eric)
+        self.max_item = 31579975  # TODO: hack, replace it with data fetch from BQ (@Eric)
         self.project_id = project_id
         self.topic = topic
         self.topic_name = f"projects/{project_id}/topics/{topic}"
         self.publish_timeout = 60
+        self.max_stories = 2
+        self.num_stories = 0
 
     def run(self):
 
@@ -69,7 +71,7 @@ class HackerNewsGetItem(L.LightningWork):
             if response.status_code == 200:
                 self.max_item = response.json()
 
-        while True:
+        while self.num_stories < self.max_stories:
             _data = {col: None for col in STORIES_SCHEMA}
 
             response = client.get(constants.HACKERNEWS_ITEMS_ENDPOINT.format(id=self.max_item))
@@ -90,6 +92,7 @@ class HackerNewsGetItem(L.LightningWork):
             logging.info(f"Found a new item: {data}")
             logging.info(f"The last item retrieved: {self.max_item}")
             self.max_item += 1
+            self.num_stories += 1
 
     def publish(self):
 
