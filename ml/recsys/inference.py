@@ -73,9 +73,13 @@ def generate_embeddings(stories, weights_path):
     embed_model = TANRModule.load_from_checkpoint(weights_path, config=config)
 
     news_embeddings = embed_model.get_news_vector(candidate_news).tolist()
+<<<<<<< HEAD
     created_time = dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     news_embeddings = [
         {"story_id": df["id"].iloc[i], "embeddings": embed, "created_at": created_time}
         for i, embed in enumerate(news_embeddings)
     ]
+=======
+    news_embeddings = [{"id": df["id"].iloc[i], "embeddings": embed} for i, embed in enumerate(news_embeddings)]
+>>>>>>> dc41784 (Add topic classifier and story encoder)
     return news_embeddings
