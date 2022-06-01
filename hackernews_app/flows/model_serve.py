@@ -1,7 +1,7 @@
 import lightning as L
 
 from hackernews_app.ui.home import home_ui
-from hackernews_app.works.model_serve import FastAPIWork
+from hackernews_app.works.fastapi import FastAPIWork
 
 
 class ModelServeFlow(L.LightningFlow):
@@ -13,8 +13,7 @@ class ModelServeFlow(L.LightningFlow):
         self.server_one = FastAPIWork(module="fastapi_app", api_object="app")
 
     def run(self):
-        if not self.server_one.has_started:
-            self.server_one.run()
+        self.server_one.run()
 
     def configure_layout(self):
         return L.frontend.StreamlitFrontend(render_fn=home_ui)
