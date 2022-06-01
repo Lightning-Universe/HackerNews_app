@@ -8,9 +8,6 @@ import torch
 from config import TANRConfig
 from ml.recsys.models.module import TANRModule
 
-# In[2]:
-
-
 spaces = [
     "\u200b",
     "\u200e",
@@ -83,3 +80,10 @@ def generate_embeddings(stories, weights_path):
     news_embeddings = [{"id": df["id"].iloc[i], "embeddings": embed} for i, embed in enumerate(news_embeddings)]
 >>>>>>> dc41784 (Add topic classifier and story encoder)
     return news_embeddings
+
+
+def get_click_prediction(user_vec, story_vec, model):
+    story_vec = torch.tensor(story_vec)
+    user_vec = torch.tensor(user_vec)
+    preds = model.get_prediction(story_vec, user_vec).sigmoid().tolist()
+    return preds
