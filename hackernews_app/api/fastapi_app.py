@@ -48,6 +48,23 @@ def recommend(payload: Dict, response: Response):
         type: "top"|"recommendation"
     }
     """
+    user_embed_query = 
+    """
+    with ranked_embeddings as (
+  select
+        user_embeddings
+        , rank() over (PARTITION BY username ORDER BY created_at desc) _rank
+  from hacker_news.user_embeddings
+  -- where username = <{PARAMTERIZE}>
+)
+select
+  user_embeddings
+from
+  ranked_embeddings
+where
+  _rank = 1
+;
+    """
 
     global recsys_model
     user_vec = np.random.randn(300).tolist()
@@ -55,8 +72,8 @@ def recommend(payload: Dict, response: Response):
         {
             "title": ["This is a tech article"] * 100,
             "url": ["https://pytorch-lightning.readthedocs.io/en/stable/"] * 100,
-            "topic": ["Tech"] * 100,
             "creation_date": ["2022-01-01"] * 100,
+            "topic": ["Tech"] * 100,
             "embed": [[0.234] * 300] * 100,
         }
     )
