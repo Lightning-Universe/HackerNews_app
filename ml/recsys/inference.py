@@ -8,6 +8,7 @@ import torch
 from config import TANRConfig
 from ml.recsys.models.module import TANRModule
 
+
 spaces = [
     "\u200b",
     "\u200e",
@@ -87,3 +88,36 @@ def get_click_prediction(user_vec, story_vec, model):
     user_vec = torch.tensor(user_vec)
     preds = model.get_prediction(story_vec, user_vec).sigmoid().tolist()
     return preds
+
+
+def generate_embeddings(stories, weights_path):
+    df = pd.DataFrame(stories)
+    print(df)
+
+    df["title"] = (
+        df["title"]
+        .str.lower()
+        .apply(lambda x: re.sub(r"""(?<=\w)([!?,.-:/"/'])""", r" \1 ", x))
+        .apply(remove_space)
+        .str.strip()
+    )
+
+    with open("data/word2int.json") as fp:
+        word2int = json.load(fp)
+
+    df["title"] = df["title"].apply(lambda x: tokenize(x, word2int))
+    df = df.loc[df["title"].apply(len) > 0]
+
+    config = TANRConfig()
+    config.num_words = len(word2int) + 1  # PAD
+
+    candidate_news = df["title"].tolist()
+    candidate_news = torch.tensor(
+        [(news + [0] * config.num_words_title)[: config.num_words_title] for news in candidate_news]
+    )
+    candidate_news = {"title": candidate_news}
+    embed_model = TANRModule.load_from_checkpoint(weights_path, config=config)
+
+    news_embeddings = embed_model.get_news_vector(candidate_news).tolist()
+    news_embeddings = [{"id": df["id"].iloc[i], "embeddings": embed} for i, embed in enumerate(news_embeddings)]
+    return news_embeddings

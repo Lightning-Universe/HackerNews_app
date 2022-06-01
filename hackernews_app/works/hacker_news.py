@@ -54,7 +54,7 @@ class HackerNewsGetItem(L.LightningWork):
         super().__init__(*args, **kwargs)
         self.base_url = constants.HACKERNEWS_BASEURL
         self.data = []
-        self.max_item = 31574551  # TODO: hack, replace it with data fetch from BQ (@Eric)
+        self.max_item = 31579971  # TODO: hack, replace it with data fetch from BQ (@Eric)
         self.project_id = project_id
         self.topic = topic
         self.topic_name = f"projects/{project_id}/topics/{topic}"
