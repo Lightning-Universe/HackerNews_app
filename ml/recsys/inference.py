@@ -6,6 +6,7 @@ import pandas as pd
 import torch
 
 from config import TANRConfig
+import fsspec
 from ml.recsys.models.module import TANRModule
 
 
@@ -102,7 +103,7 @@ def generate_embeddings(stories, weights_path):
         .str.strip()
     )
 
-    with open("data/word2int.json") as fp:
+    with fsspec.open(f"filecache::s3://pl-public-data/hackernews_app/word2int.json", s3={"anon": True}, filecache={"cache_storage": "/tmp/files"}) as fp:
         word2int = json.load(fp)
 
     df["title"] = df["title"].apply(lambda x: tokenize(x, word2int))
@@ -125,3 +126,10 @@ def generate_embeddings(stories, weights_path):
         for i, embed in enumerate(news_embeddings)
     ]
     return news_embeddings
+
+
+def get_click_prediction(user_vec, story_vec, model):
+    story_vec = torch.tensor(story_vec)
+    user_vec = torch.tensor(user_vec)
+    preds = model.get_prediction(story_vec, user_vec).sigmoid().tolist()
+    return preds
