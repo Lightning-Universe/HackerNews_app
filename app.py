@@ -1,6 +1,9 @@
+<<<<<<< HEAD
 import os
 import time
 
+=======
+>>>>>>> 2e2ef23 (Refactor fastapi component. Broke out http request into it's own work.)
 import lightning as L
 
 from hackernews_app.flows import AppStarting, HackerNewsUI
