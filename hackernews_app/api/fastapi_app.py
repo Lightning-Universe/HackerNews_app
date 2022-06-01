@@ -3,14 +3,19 @@ import logging
 import re
 from typing import Dict
 
+import numpy as np
+import pandas as pd
 from fastapi import FastAPI, Response, status
-from google.cloud import bigquery
 
+from config import TANRConfig
 from hackernews_app.contexts.secrets import LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS
+from ml.recsys.inference import get_click_prediction
+from ml.recsys.models.module import TANRModule
 
 logging.basicConfig(filename=f".{__name__}.log", format="%(filename)s: %(message)s", level=logging.INFO)
 
 app = FastAPI()
+recsys_model = None
 
 BQ_CREDENTIALS = LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS
 BQ_LOCATION = "US"
@@ -23,7 +28,7 @@ def healthz():
 
 
 @app.post("/api/recommend", status_code=status.HTTP_200_OK)
-def recommend(data: Dict, response: Response):
+def recommend(payload: Dict, response: Response):
     """Requires a reference to a model and the materialized view that.
 
     - batch train batch predict: query the warehouse
@@ -44,46 +49,37 @@ def recommend(data: Dict, response: Response):
     }
     """
 
-    username = data.get("username", None)
-    if not username:
-        response.status_code = status.HTTP_400_BAD_REQUEST
-        return {"data": "Requires a user, but user not found."}
-
-    # Handle special characters and single quotes
-    username = re.escape(username).replace("'", "\\'")
-
-    query = f"""
-    select
-        title
-        , url
-        , topic
-        , cast(creation_date as string) creation_date
-    from
-        `hacker_news.v_lightningapp_hackernews_recommend`
-    where
-        lower(username) = '{username.lower()}'
-    order by
-        ranking
-    """
-
-    logging.info(f"User recommendation query: {query}")
-    client = bigquery.Client(BQ_PROJECT, credentials=LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS)
-    cursor = client.query(query, location=BQ_LOCATION)
-    user_recommendation_df = cursor.result().to_dataframe()
-
-    if user_recommendation_df.empty:
-        response = {
-            "results": [],
-            "type": "top",
+    global recsys_model
+    user_vec = np.random.randn(300).tolist()
+    stories = pd.DataFrame(
+        {
+            "title": ["This is a tech article"] * 100,
+            "url": ["https://pytorch-lightning.readthedocs.io/en/stable/"] * 100,
+            "topic": ["Tech"] * 100,
+            "creation_date": ["2022-01-01"] * 100,
+            "embed": [[0.234] * 300] * 100,
         }
-    else:
-        logging.info(f"User recommendation data frame return: {user_recommendation_df}")
-        response = user_recommendation_df.to_json(orient="records")
-        recommendations = json.loads(response)
-
-        response = {
-            "results": recommendations,
-            "type": "recommendation",
-        }
-
+    )
+    story_vec = stories["embed"].tolist()
+    stories["pred"] = get_click_prediction(user_vec, story_vec, recsys_model)
+    stories = stories.sort_values(by="pred", ascending=False).head(50)
+    stories = stories.drop(["pred", "embed"], axis=1)
+    response = {
+        "results": stories,
+        "type": "recommendation",
+    }
     return response
+
+
+@app.post("/api/update_recsys_weights")
+def update_model(payload: Dict):
+    global recsys_model
+
+    # TODO: Update the word2int here (@rohitgr7)
+    with open("data/word2int.json") as fp:
+        word2int = json.load(fp)
+
+    config = TANRConfig()
+    config.num_words = len(word2int) + 1  # PAD
+
+    recsys_model = TANRModule.load_from_checkpoint(payload["weights_path"], config=config)
