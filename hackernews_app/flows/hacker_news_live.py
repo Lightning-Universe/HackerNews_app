@@ -59,8 +59,11 @@ class HackerNewsLiveStories(L.LightningFlow):
             # random stories (remove it)
             stories = [{"title": "Tech published a new article", "id": i} for i in range(5)]
             if stories:
+                print("run started")
                 self.topic_classifier.run(stories)
-                self.story_encoder.run(stories)
+                # self.story_encoder.run(stories)
+                print("run is compelted")
+                topics = self.topic_classifier.topics
 
             self.bq_inserter.run(
                 query=None,
