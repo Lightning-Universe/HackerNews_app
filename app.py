@@ -26,9 +26,8 @@ class HackerNews(L.LightningFlow):
         self.health_check = HealthCheck(run_once=False)
 
     def run(self):
-
         self.model_service.run()
-        while self.health_check.is_healthy is False:
+        if self.health_check.is_healthy is False:
             self.health_check.get(f"{self.model_service.server_one.url}/healthz")
             time.sleep(1)
 
