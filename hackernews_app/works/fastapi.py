@@ -1,6 +1,7 @@
 import subprocess
 import time
 
+import requests
 from lightning import LightningWork
 
 
@@ -28,3 +29,6 @@ class FastAPIWork(LightningWork):
                 return
 
             self.url = self._url
+
+    def health(self):
+        return requests.get(f"http://{self.host}:{self.port}")
