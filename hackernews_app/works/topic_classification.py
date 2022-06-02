@@ -11,8 +11,6 @@ class TopicClassification(L.LightningWork):
         self.topics = None
 
     def run(self, stories):
-        # topics = topic_predict([story["title"] for story in stories], self.weights_path)
-        # topics = [{"id": story["id"], "topic": topic} for story, topic in zip(stories, topics)]
-        topics = [1, 2, 3, 4]
-        # self.topics = L.storage.Payload(topics)
-        print("post run is completed")
+        topics = topic_predict([story["title"] for story in stories], self.weights_path)
+        topics = [{"id": story["id"], "topic": topic} for story, topic in zip(stories, topics)]
+        self.topics = L.storage.Payload(topics)

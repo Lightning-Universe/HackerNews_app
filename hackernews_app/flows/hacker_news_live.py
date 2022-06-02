@@ -42,37 +42,42 @@ class HackerNewsLiveStories(L.LightningFlow):
         self.topic_classifier = TopicClassification(None)
         self.story_encoder = StoryEncoder(None)
 
+        self.hn_data = None
+        self.topics = None
+        self.story_encodings = None
+
     def run(self, credentials):
+        if self.hn_data is None:
+            if self.item_getter.has_succeeded and self.item_getter.data and self.is_bq_inserting is False:
+                self.is_bq_inserting = True
 
-        if self.item_getter.has_succeeded and self.item_getter.data and self.is_bq_inserting is False:
-            logging.info(self.item_getter.max_item)
-            logging.info(self.is_bq_inserting)
-            self.is_bq_inserting = True
-
-            json_rows = [
-                {**json.loads(data), **{"created_at": dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}}
-                for data in self.item_getter.data
-            ]
-            stories = [row for row in json_rows if row["type"] == "story" and row["title"] is not None]
+                self.hn_data = [
+                    {**json.loads(data), **{"created_at": dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}}
+                    for data in self.item_getter.data
+                ]
+        else:
+            stories = [row for row in self.hn_data if row["type"] == "story" and row["title"] is not None]
             stories = [{"title": row["title"], "id": row["id"]} for row in stories]
 
             # random stories (remove it)
             stories = [{"title": "Tech published a new article", "id": i} for i in range(5)]
             if stories:
-                print("run started")
                 self.topic_classifier.run(stories)
-                # self.story_encoder.run(stories)
-                print("run is compelted")
                 topics = self.topic_classifier.topics
+                self.story_encoder.run(stories)
+                story_encodings = self.story_encoder.encodings
 
             self.bq_inserter.run(
                 query=None,
                 project=self.project_id,
                 location=self.location,
                 credentials=credentials,
-                json_rows=json_rows,
+                json_rows=self.hn_data,
                 table="hacker_news.items",
             )
+
+            self.hn_data = None
+
             # TODO: Comeback to enabule the subscriber. There is an issue with passing/receiving data from pubsub.
             #       It is encoding the byte representation as a literal string. i.e. 'foo bar' gets received by
             #       the subscriber as byte("b'foo bar'") -- creating issues with urls.
@@ -93,7 +98,6 @@ class HackerNewsLiveStories(L.LightningFlow):
         time.sleep(self.time_interval)
 
     def on_after_run(self):
-
         self.subscriber.messages = []
 
 
