@@ -14,6 +14,6 @@ class FastAPIServer(L.LightningWork):
         self.url = ""
 
     def run(self):
-        uvicorn.run(app, host=self.host, port=self.port, loop="asyncio")
+        uvicorn.run(app, host=self.host, port=self.port)
         if not self.url:
             self.url = f"http://{self.host}:{self.port}"
