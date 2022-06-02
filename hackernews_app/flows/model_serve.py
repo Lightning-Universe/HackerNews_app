@@ -11,11 +11,9 @@ class ModelServeFlow(L.LightningFlow):
         super().__init__(*args, **kwargs)
 
         self.server_one = FastAPIServer(parallel=True)
-        self.is_app_running = False
 
     def run(self):
         self.server_one.run()
-        self.is_app_running = True
 
     def configure_layout(self):
         return L.frontend.StreamlitFrontend(render_fn=home_ui)

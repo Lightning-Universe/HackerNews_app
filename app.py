@@ -1,3 +1,5 @@
+import time
+
 import lightning as L
 
 from hackernews_app.flows.model_serve import ModelServeFlow
@@ -28,9 +30,10 @@ class HackerNews(L.LightningFlow):
         self.model_service.run()
         while self.health_check.is_healthy is False:
             self.health_check.get(f"{self.model_service.server_one.url}/healthz")
+            time.sleep(1)
 
     def configure_layout(self):
-        if self.model_service.is_app_running:
+        if self.health_check.is_healthy:
             return {"name": "Home", "content": self.model_service}
         else:
             return {"name": "Home", "content": self.app_starting}
