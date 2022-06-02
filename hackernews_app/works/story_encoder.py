@@ -8,7 +8,8 @@ class StoryEncoder(L.LightningWork):
         super().__init__(parallel=True)
         # TODO: provide proper weights_path (@rohitgr7)
         self.weights_path = "ml/recsys/recsys_model_weights.ckpt"
-        self.embeddings = None
+        self.encodings = None
 
     def run(self, stories):
-        embeddings = generate_embeddings(stories, self.weights_path)
+        encodings = generate_embeddings(stories, self.weights_path)
+        self.encodings = L.storage.Payload(encodings)
