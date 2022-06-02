@@ -4,60 +4,6 @@ from transformers import AutoModelForSequenceClassification
 
 from pytorch_lightning import LightningModule
 
-MAIN_CATEGORIES = {
-    "Education": ["EDUCATION", "COLLEGE"],
-    "Business": ["BUSINESS", "MONEY"],
-    "Sports": ["SPORTS"],
-    "Technology": ["TECH", "SCIENCE"],
-    "News and Politics": [
-        "POLITICS",
-        "BLACK VOICES",
-        "QUEER VOICES",
-        "LATINO VOICES",
-        "WOMEN",
-        "IMPACT",
-        "RELIGION",
-        "CRIME",
-        "GOOD NEWS",
-        "MEDIA",
-        "WEIRD NEWS",
-        "WORLD NEWS",
-        "THE WORLDPOST",
-        "WORLDPOST",
-    ],
-    "Lifestyle": [
-        "WELLNESS",
-        "TRAVEL",
-        "STYLE & BEAUTY",
-        "PARENTING",
-        "HEALTHY LIVING",
-        "FOOD & DRINK",
-        "HOME & LIVING",
-        "ENVIRONMENT",
-        "PARENTS",
-        "STYLE",
-        "TASTE",
-        "GREEN",
-        "FIFTY",
-    ],
-    "Culture and Arts": ["ARTS & CULTURE", "CULTURE & ARTS", "WEDDINGS", "DIVORCE", "ARTS"],
-    "Entertainment": ["ENTERTAINMENT", "COMEDY"],
-}
-
-CLASSES = [
-    "Education",
-    "Business",
-    "Sports",
-    "Technology",
-    "News and Politics",
-    "Lifestyle",
-    "Culture and Arts",
-    "Entertainment",
-]
-CLASSES_TO_IX = {cl: i for i, cl in enumerate(CLASSES)}
-IX_TO_CLASSES = {i: cl for cl, i in CLASSES_TO_IX.items()}
-MODEL_NAME = "distilbert-base-uncased"
-
 
 class NewsClassificationModule(LightningModule):
     def __init__(self, num_classes, model_name):

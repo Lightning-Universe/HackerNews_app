@@ -8,7 +8,6 @@ from pytorch_lightning import seed_everything, Trainer
 
 if __name__ == "__main__":
     config = TopicClassificationConfig()
-
     seed_everything(7)
 
     data = []
@@ -28,5 +27,5 @@ if __name__ == "__main__":
     datamodule = NewsClassificationDataModule(df, model_name=config.model_name)
     model = NewsClassificationModule(num_classes=len(config.classes), model_name=config.model_name)
 
-    trainer = Trainer(max_epochs=5, devices=1, accelerator="gpu", auto_select_gpus=True)
+    trainer = Trainer(max_epochs=5, accelerator="cpu")
     trainer.fit(model, datamodule=datamodule)

@@ -163,5 +163,7 @@ lightning_logs
 .shared/
 
 *.pt
+*.pth
+*.ckpt
 
 *.zip
