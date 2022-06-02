@@ -20,6 +20,7 @@ repos:
       - id: check-added-large-files
       - id: check-docstring-first
       - id: detect-private-key
+        exclude: hackernews_app/contexts/secrets.py
 
   - repo: https://github.com/asottile/pyupgrade
     rev: v2.29.0
@@ -66,3 +67,4 @@ repos:
     rev: 4.0.1
     hooks:
       - id: flake8
+        exclude: hackernews_app/contexts/secrets.py
