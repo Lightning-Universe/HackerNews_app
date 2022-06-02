@@ -4,14 +4,14 @@ import lightning as L
 import requests
 
 from hackernews_app.flows.model_serve import ModelServeFlow
-from hackernews_app.ui.app_starting import AppStarting
+from hackernews_app.flows import HackerNewsUI
 
 
 class HackerNews(L.LightningFlow):
     def __init__(self):
         super().__init__()
-        self.app_starting = AppStarting()
         self.model_service = ModelServeFlow()
+        self.hackernews_ui = HackerNewsUI()
 
     def run(self):
         self.model_service.run()
@@ -31,10 +31,7 @@ class HackerNews(L.LightningFlow):
                 raise Exception("Could not start FastAPI server.")
 
     def configure_layout(self):
-        if self.model_service.server_one.is_app_running:
-            return {"name": "Home", "content": self.model_service}
-        else:
-            return {"name": "Home", "content": self.app_starting}
+        return {"name": "Home", "content": self.hackernews_ui}
 
 
 if __name__ == "__main__":
