@@ -1,5 +1,6 @@
 import torch
-from models.additive import AdditiveAttention
+
+from ml.recsys.models.additive import AdditiveAttention
 
 
 class UserEncoder(torch.nn.Module):

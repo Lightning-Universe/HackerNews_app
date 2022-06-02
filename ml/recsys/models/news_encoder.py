@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from models.additive import AdditiveAttention
+
+from ml.recsys.models.additive import AdditiveAttention
 
 
 class NewsEncoder(torch.nn.Module):
