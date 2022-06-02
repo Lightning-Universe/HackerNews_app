@@ -1,16 +1,16 @@
 import numpy as np
 import torch
-from datamodule.datamodule import TANRDataModule
-from models.module import TANRModule
 
 from config import TANRConfig
+from ml.recsys.datamodule.datamodule import TANRDataModule
+from ml.recsys.models.module import TANRModule
 from pytorch_lightning import seed_everything, Trainer
 
 if __name__ == "__main__":
     seed_everything(7)
     config = TANRConfig()
     pretrained_word_embedding = np.load("data/final_embeddings.npy")
-    pretrained_word_embedding = torch.from_numpy(pretrained_word_embedding)
+    pretrained_word_embedding = torch.from_numpy(pretrained_word_embedding).float()
 
     model = TANRModule(config, pretrained_word_embedding=pretrained_word_embedding)
     datamodule = TANRDataModule(
