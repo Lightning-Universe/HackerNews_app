@@ -11,4 +11,5 @@ google-cloud-bigquery==3.1.0
 requests==2.27.1
 db-dtypes==1.0.1
 transformers==4.19.2
+pytorch-lightning==1.6.4
 # -e git+ssh://git@github.com/PyTorchLightning/google-cloud.git@9ab869e873bf75c9cbac3658af0b56fb10ee99b8#egg=lightning_gcp
