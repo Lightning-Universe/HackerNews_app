@@ -1,6 +1,6 @@
-import lightning as L
 import uuid
 
+import lightning as L
 import pandas as pd
 import requests
 import streamlit as st
@@ -8,7 +8,6 @@ from lightning.utilities.state import AppState
 
 
 class HackerNewsUI(L.LightningFlow):
-    
     def __init__(self):
         super().__init__()
         # Define required states for multiple user sessions
@@ -16,11 +15,11 @@ class HackerNewsUI(L.LightningFlow):
             "username": None,
             "user_status": False,
         }
-        
+
     def configure_layout(self):
         return L.frontend.StreamlitFrontend(render_fn=hackernews_streamlit)
-    
-    
+
+
 TEXT_ELEMENTS = {
     # Text for the home page.
     "welcome_title": "👋 Welcome to HackerRec!",
@@ -50,20 +49,18 @@ def hackernews_streamlit(lightning_app_state):
 
 
 def set_session_states_for_multi_users(**kwargs):
-    """
-    Set session states for multiple users.
-    """
+    """Set session states for multiple users."""
     if "session_id" not in st.session_state:
         st.session_state["session_id"] = uuid.uuid1().hex
 
     for key, value in kwargs.items():
         if key not in st.session_state:
             st.session_state[key] = value
-            
-            
+
+
 def home_page(state: AppState, text_elements: dict):
-    """
-    There are three main pages in this app:
+    """There are three main pages in this app:
+
     1. Welcome page
     2. Error page when the user does not exist or does not have any favorites
     3. User page when the user is logged in and with recommendations table
@@ -77,9 +74,7 @@ def home_page(state: AppState, text_elements: dict):
     if not st.session_state.username:
         intro.title(text_elements.welcome_title)
         intro.subheader(text_elements.welcome_subheader)
-        st.session_state.username = intro.text_input(
-            "Username", placeholder=text_elements.text_input_placeholder
-        )
+        st.session_state.username = intro.text_input("Username", placeholder=text_elements.text_input_placeholder)
     else:
         recommendations_table(state)
         if (not st.session_state.user_status) and st.session_state.username:
@@ -100,15 +95,14 @@ def home_page(state: AppState, text_elements: dict):
 
 
 def recommendations_table(state: AppState):
-    """
-    Render the recommendations table.
-    
+    """Render the recommendations table.
+
     +------------------------------------+-------------+---------------------+
     | Story Title                        | Category    | Created on          |
     +====================================+=============+=====================+
     | HackerNews App for recommendations | Technology  | 1st June, 2022      |
     +------------------------------------+-------------+---------------------+
-    
+
     TODO (@kaushikb11): Make the recommendations table prettier ;)
     """
     if not st.session_state.username:
@@ -140,8 +134,8 @@ def recommendations_table(state: AppState):
     st.markdown(hide_table_row_index, unsafe_allow_html=True)
     # st.table(df)
     st.write(df.to_html(escape=False, index=False, justify="center"), unsafe_allow_html=True)
-    
-    
+
+
 @st.experimental_memo(show_spinner=False)
 def get_user_recommendations(username: str, base_url: str):
 
