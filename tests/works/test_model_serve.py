@@ -1,7 +1,7 @@
 import time
 from threading import Thread
 
-from hackernews_app.works.model_serve import FastAPIWork
+from hackernews_app.works.fastapi import FastAPIWork
 
 
 def test_fastapi_work():
