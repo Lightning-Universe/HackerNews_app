@@ -36,7 +36,7 @@ class HackerNewsLiveStories(L.LightningFlow):
             subscription="hacker-news-items-subscription",
             run_once=False,
         )
-        self.bq_inserter = BigQueryWork(run_once=False)
+        self.bq_inserter = BigQueryWork(run_once=True)
         self.is_bq_inserting = False
 
         self.topic_classifier = TopicClassification(None)
@@ -63,9 +63,27 @@ class HackerNewsLiveStories(L.LightningFlow):
             stories = [{"title": "Tech published a new article", "id": i} for i in range(5)]
             if stories:
                 self.topic_classifier.run(stories)
-                topics = self.topic_classifier.topics
                 self.story_encoder.run(stories)
-                story_encodings = self.story_encoder.encodings
+
+                self.bq_inserter.run(
+                    query=None,
+                    project=self.project_id,
+                    location=self.location,
+                    credentials=credentials,
+                    json_rows=self.topic_classifier.topics,
+                    table="hacker_news.story_topics",
+                )
+
+                self.bq_inserter.run(
+                    query=None,
+                    project=self.project_id,
+                    location=self.location,
+                    credentials=credentials,
+                    json_rows=self.story_encoder.encodings,
+                    table="hacker_news.story_embeddings",
+                )
+                print("%%%%%%%%%%%%%%%%%%%%")
+                print("pred insertion complete")
 
             self.bq_inserter.run(
                 query=None,
@@ -75,6 +93,8 @@ class HackerNewsLiveStories(L.LightningFlow):
                 json_rows=self.hn_data,
                 table="hacker_news.items",
             )
+            print("%%%%%%%%%%%%%%%%%%%%")
+            print("insertion complete")
 
             self.hn_data = None
 

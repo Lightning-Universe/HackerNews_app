@@ -1,3 +1,4 @@
+import datetime as dt
 import json
 import re
 
@@ -72,5 +73,9 @@ def generate_embeddings(stories, weights_path):
     embed_model = TANRModule.load_from_checkpoint(weights_path, config=config)
 
     news_embeddings = embed_model.get_news_vector(candidate_news).tolist()
-    news_embeddings = [{"id": df["id"].iloc[i], "embeddings": embed} for i, embed in enumerate(news_embeddings)]
+    created_time = dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    news_embeddings = [
+        {"story_id": df["id"].iloc[i], "embeddings": embed, "created_at": created_time}
+        for i, embed in enumerate(news_embeddings)
+    ]
     return news_embeddings
