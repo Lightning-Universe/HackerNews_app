@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 import datetime as dt
-=======
->>>>>>> d225e88 (Add topic classifier and story encoder)
 import json
 import re
 

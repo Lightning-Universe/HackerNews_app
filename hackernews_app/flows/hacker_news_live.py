@@ -81,12 +81,6 @@ class HackerNewsLiveStories(L.LightningFlow):
                     table="hacker_news.story_embeddings",
                 )
 
-            json_rows = [row for row in json_rows if row["type"] == "story"]
-            story_topics = [{"story_id": story_id, "topic": some_topic}]
-            embeddings = [{"story_id": story_id, "embeddings": [n1, ....n300]}]
-
-            breakpoint()
-
             self.bq_inserter.run(
                 query=None,
                 project=self.project_id,
