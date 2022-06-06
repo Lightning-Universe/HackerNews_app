@@ -91,7 +91,7 @@ class HackerNewsGetItem(L.LightningWork):
             _data.update(data)
             _data = {k: _data[k] for k in STORIES_SCHEMA}
             self.data = [*self.data, json.dumps(_data)]
-            logging.info(f"Found a new item: {data}")
+            # logging.info(f"Found a new item: {data}")
             logging.info(f"The last item retrieved: {self.max_item}")
             self.max_item += 1
             self.num_stories += 1

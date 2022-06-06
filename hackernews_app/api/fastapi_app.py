@@ -6,6 +6,7 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 from fastapi import FastAPI, Response, status
+from google.cloud import bigquery
 
 from config import TANRConfig
 from hackernews_app.contexts.secrets import LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS
@@ -35,7 +36,7 @@ def recommend(payload: Dict, response: Response):
     - batch train, real-time inference
     TODO: look into DVC (https://dvc.org/) or feast (https://docs.feast.dev/).
 
-    Response:
+    Returns:
     {
         results: [
             {
@@ -48,25 +49,25 @@ def recommend(payload: Dict, response: Response):
         type: "top"|"recommendation"
     }
     """
-    user_embed_query = 
-    """
+
+    user_embed_query = f"""
     with ranked_embeddings as (
-  select
-        user_embeddings
-        , rank() over (PARTITION BY username ORDER BY created_at desc) _rank
-  from hacker_news.user_embeddings
-  -- where username = <{PARAMTERIZE}>
-)
-select
-  user_embeddings
-from
-  ranked_embeddings
-where
-  _rank = 1
-;
+        SELECT user_embeddings, rank() OVER (PARTITION BY username ORDER BY created_at desc) _rank
+        FROM hacker_news.user_embeddings
+        WHERE username = {payload['username']}
+    )
+    SELECT user_embeddings
+    FROM ranked_embeddings
+    WHERE _rank = 1;
     """
 
-    global recsys_model
+    client = bigquery.Client(BQ_PROJECT, credentials=LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS)
+    cursor = client.query(user_embed_query, location=BQ_LOCATION)
+    print(dir(cursor.result()))
+    user_vec = cursor.result().to_dataframe()
+    print(user_vec)
+
+    ####### random data
     user_vec = np.random.randn(300).tolist()
     stories = pd.DataFrame(
         {
@@ -77,7 +78,10 @@ where
             "embed": [[0.234] * 300] * 100,
         }
     )
+    ##########
+
     story_vec = stories["embed"].tolist()
+    global recsys_model
     stories["pred"] = get_click_prediction(user_vec, story_vec, recsys_model)
     stories = stories.sort_values(by="pred", ascending=False).head(50)
     stories = stories.drop(["pred", "embed"], axis=1)

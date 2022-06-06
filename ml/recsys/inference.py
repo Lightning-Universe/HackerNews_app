@@ -2,13 +2,12 @@ import datetime as dt
 import json
 import re
 
+import fsspec
 import pandas as pd
 import torch
 
 from config import TANRConfig
-import fsspec
 from ml.recsys.models.module import TANRModule
-
 
 spaces = [
     "\u200b",
@@ -93,7 +92,13 @@ def get_click_prediction(user_vec, story_vec, model):
 
 def generate_embeddings(stories, weights_path):
     df = pd.DataFrame(stories)
-    print(df)
+    news_embeddings = torch.randn(df.shape[0], 300).tolist()
+    created_time = dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    news_embeddings = [
+        {"story_id": df["id"].iloc[i], "embeddings": embed, "created_at": created_time}
+        for i, embed in enumerate(news_embeddings)
+    ]
+    return news_embeddings
 
     df["title"] = (
         df["title"]
@@ -103,7 +108,11 @@ def generate_embeddings(stories, weights_path):
         .str.strip()
     )
 
-    with fsspec.open(f"filecache::s3://pl-public-data/hackernews_app/word2int.json", s3={"anon": True}, filecache={"cache_storage": "/tmp/files"}) as fp:
+    with fsspec.open(
+        f"filecache::s3://pl-public-data/hackernews_app/word2int.json",
+        s3={"anon": True},
+        filecache={"cache_storage": "/tmp/files"},
+    ) as fp:
         word2int = json.load(fp)
 
     df["title"] = df["title"].apply(lambda x: tokenize(x, word2int))
