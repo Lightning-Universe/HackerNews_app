@@ -59,11 +59,12 @@ class BigQueryWork(L.LightningWork):
         table: Optional[str] = None,
     ) -> None:
 
+        if isinstance(json_rows, L.storage.Payload):
+            json_rows = json_rows.value
+
         self.query = query or self.query
         self.project = project or self.project
         self.location = location or self.location
-        print("#######################")
-        print(json_rows)
 
         if self.query is None and json_rows is None:
             raise ValueError(f"`query` or `rows_to_insert` is required. Found: {self.query}")

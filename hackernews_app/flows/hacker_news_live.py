@@ -59,8 +59,6 @@ class HackerNewsLiveStories(L.LightningFlow):
             stories = [row for row in self.hn_data if row["type"] == "story" and row["title"] is not None]
             stories = [{"title": row["title"], "id": row["id"]} for row in stories]
 
-            # random stories (remove it)
-            stories = [{"title": "Tech published a new article", "id": i} for i in range(5)]
             if stories:
                 self.topic_classifier.run(stories)
                 self.story_encoder.run(stories)
@@ -82,8 +80,6 @@ class HackerNewsLiveStories(L.LightningFlow):
                     json_rows=self.story_encoder.encodings,
                     table="hacker_news.story_embeddings",
                 )
-                print("%%%%%%%%%%%%%%%%%%%%")
-                print("pred insertion complete")
 
             self.bq_inserter.run(
                 query=None,
@@ -93,8 +89,6 @@ class HackerNewsLiveStories(L.LightningFlow):
                 json_rows=self.hn_data,
                 table="hacker_news.items",
             )
-            print("%%%%%%%%%%%%%%%%%%%%")
-            print("insertion complete")
 
             self.hn_data = None
 
