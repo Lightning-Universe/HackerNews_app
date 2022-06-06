@@ -32,5 +32,5 @@ if __name__ == "__main__":
     datamodule = NewsClassificationDataModule(df, model_name=config.model_name)
     model = NewsClassificationModule(num_classes=len(config.classes), model_name=config.model_name)
 
-    trainer = Trainer(max_epochs=5, accelerator="cpu")
+    trainer = Trainer(max_epochs=5)
     trainer.fit(model, datamodule=datamodule)
