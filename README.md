@@ -51,3 +51,25 @@ lightning run app app.py --cloud
 1. User enters their username on the [UI](https://01g3zbthsnjj4qq0axpycgts35.litng-ai-03.litng.ai/view/Home)
 1. We show a list of personalized HackerNews stories to the user based on their favorites.
 1. User has the option to filter the recommendations based on the topics they are interested in.
+
+### Design
+
+The current design runs batch predictions on users who favorited at least one story. We plan to introduce
+model training within the HackerNews app in the future, for now we're using the
+[PyTorch Lightning App](https://lightning.ai/app/AU3WoWwdAP-Train%20%26%20Deploy%20PyTorch%20Lightning) to train
+models prior to loading their predictions into BigQuery:
+
+<details>
+    <summary>Data Flow Design: Offline Training and Batch Predictions</summary>
+    <img src="static/design/hnapp_dataflow.jpg" alt="Image Of Data Flow"></img>
+</details>
+
+<details>
+    <summary> Lightning App Design </summary>
+    <p>
+        The main component, ModelServeFlow, orchestrates the communication between FastAPIServer and a Streamlit
+        frontend. Since Streamlit has it's own state that manages user sessions, we pass Lightning app state to
+        the Streamlit App State.
+    </p>
+    <img src="static/design/hnapp_litflow.jpg" alt="Lightning App Flow"></img>
+</details>
