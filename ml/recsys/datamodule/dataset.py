@@ -1,5 +1,6 @@
 import json
 
+import fsspec
 import torch
 from torch.utils.data import Dataset
 
@@ -10,7 +11,7 @@ class TANRDataset(Dataset):
         self.data_path = data_path
         self.config = config
 
-        with open(data_path) as fp:
+        with fsspec.open(f"filecache::{data_path}", s3={"anon": True}, filecache={"cache_storage": "/tmp/files"}) as fp:
             self.user_data = json.load(fp)
 
     def __len__(self):
