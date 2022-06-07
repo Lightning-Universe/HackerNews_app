@@ -18,6 +18,3 @@ class FastAPIServer(L.LightningWork):
         uvicorn.run(app, host=self.host, port=self.port)
         if not self.url:
             self.url = f"http://{self.host}:{self.port}"
-
-    def health(self):
-        return requests.get(f"http://{self.host}:{self.port}")
