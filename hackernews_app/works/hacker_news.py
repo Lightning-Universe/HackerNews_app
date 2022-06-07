@@ -87,7 +87,9 @@ class HackerNewsGetItem(L.LightningWork):
 
             if data.get("url"):
                 data["url"] = urllib.parse.quote(data["url"])
+
             _data.update(data)
+            _data = {k: _data[k] for k in STORIES_SCHEMA}
             self.data = [*self.data, json.dumps(_data)]
             logging.info(f"Found a new item: {data}")
             logging.info(f"The last item retrieved: {self.max_item}")

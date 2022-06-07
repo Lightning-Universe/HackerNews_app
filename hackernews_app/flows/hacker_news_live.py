@@ -5,12 +5,13 @@ import pickle
 import time
 
 import lightning as L
+from lightning_bigquery import BigQuery
 
 from hackernews_app.api.hackernews import constants
+from hackernews_app.contexts.secrets import get_secrets
 from hackernews_app.works.hacker_news import HackerNewsGetItem, HackerNewsRequestAPI, HackerNewsSubscriber
 from hackernews_app.works.story_encoder import StoryEncoder
 from hackernews_app.works.topic_classification import TopicClassification
-from lightning_gcp.bigquery import BigQueryWork
 
 logging.basicConfig(level=logging.INFO)
 
@@ -20,23 +21,20 @@ class HackerNewsLiveStories(L.LightningFlow):
 
     def __init__(
         self,
-        project_id: str,
         topic: str,
-        location: str,
         time_interval: int = 5,
     ):
         super().__init__()
+        secrets = get_secrets()
         self.time_interval = time_interval
-        self.project_id = project_id
-        self.location = location
-        self.item_getter = HackerNewsGetItem(project_id, topic, run_once=False)
+        self.item_getter = HackerNewsGetItem(secrets["project_id"], topic, run_once=False)
         self.subscriber = HackerNewsSubscriber(
-            project_id=project_id,
+            project_id=secrets["project_id"],
             topic_name=self.item_getter.topic_name,
             subscription="hacker-news-items-subscription",
             run_once=False,
         )
-        self.bq_inserter = BigQueryWork(run_once=True)
+        self.bq_inserter = BigQuery(project=secrets["project_id"], location="US", credentials=secrets)
         self.is_bq_inserting = False
 
         self.topic_classifier = TopicClassification(None)
@@ -46,7 +44,7 @@ class HackerNewsLiveStories(L.LightningFlow):
         self.topics = None
         self.story_encodings = None
 
-    def run(self, credentials):
+    def run(self):
         if self.hn_data is None:
             if self.item_getter.has_succeeded and self.item_getter.data and self.is_bq_inserting is False:
                 self.is_bq_inserting = True
@@ -56,36 +54,33 @@ class HackerNewsLiveStories(L.LightningFlow):
                     for data in self.item_getter.data
                 ]
         else:
-            stories = [row for row in self.hn_data if row["type"] == "story" and row["title"] is not None]
-            stories = [{"title": row["title"], "id": row["id"]} for row in stories]
+            # stories = [row for row in self.hn_data if row["type"] == "story" and row["title"] is not None]
+            # stories = [{"title": row["title"], "id": row["id"]} for row in stories]
 
-            if stories:
-                self.topic_classifier.run(stories)
-                self.story_encoder.run(stories)
+            # if stories:
+            #     self.topic_classifier.run(stories)
+            #     self.story_encoder.run(stories)
 
-                self.bq_inserter.run(
-                    query=None,
-                    project=self.project_id,
-                    location=self.location,
-                    credentials=credentials,
-                    json_rows=self.topic_classifier.topics,
-                    table="hacker_news.story_topics",
-                )
+            #     self.bq_inserter.run(
+            #         query=None,
+            #         project=self.project_id,
+            #         location=self.location,
+            #         credentials=credentials,
+            #         json_rows=self.topic_classifier.topics,
+            #         table="hacker_news.story_topics",
+            #     )
 
-                self.bq_inserter.run(
-                    query=None,
-                    project=self.project_id,
-                    location=self.location,
-                    credentials=credentials,
-                    json_rows=self.story_encoder.encodings,
-                    table="hacker_news.story_embeddings",
-                )
+            #     self.bq_inserter.run(
+            #         query=None,
+            #         project=self.project_id,
+            #         location=self.location,
+            #         credentials=credentials,
+            #         json_rows=self.story_encoder.encodings,
+            #         table="hacker_news.story_embeddings",
+            #     )
 
-            self.bq_inserter.run(
-                query=None,
-                project=self.project_id,
-                location=self.location,
-                credentials=credentials,
+            self.bq_inserter.insert(
+                sqlquery=None,
                 json_rows=self.hn_data,
                 table="hacker_news.items",
             )
@@ -133,15 +128,16 @@ class HackerNewsHourly(L.LightningFlow):
         self.should_execute = True  # TODO: change this to False
 
         # Run one time to get the data we need.
-        self.last_group_getter = BigQueryWork(run_once=True)
+        secrets = get_secrets()
+        self.last_group_getter = BigQuery(project=secrets["project_id"], location="US", credentials=secrets)
         self.last_group_loader = LastGroupLoader(run_once=True)
 
         # Recurring runs
         self.api_client = HackerNewsRequestAPI()
-        self.inserter = BigQueryWork(run_once=False)
+        self.inserter = BigQuery(project=secrets["project_id"], location="US", credentials=secrets)
         self.to_insert = True
 
-    def run(self, project_id, location, credentials):
+    def run(self):
 
         if self.last_group_loader.last_group is None:
 
@@ -151,10 +147,7 @@ class HackerNewsHourly(L.LightningFlow):
             """
 
             self.last_group_getter.run(
-                query=query,
-                project=project_id,
-                location=location,
-                credentials=credentials,
+                sqlquery=query,
                 to_dataframe=True,
             )
 
@@ -177,7 +170,7 @@ class HackerNewsHourly(L.LightningFlow):
             self.to_insert = False
 
             self.inserter.run(
-                query=f"""
+                sqlquery=f"""
                 INSERT INTO `hacker_news.top_stories` (story_id, created_at, group_id)
                 VALUES {
                     ",".join([
@@ -192,9 +185,6 @@ class HackerNewsHourly(L.LightningFlow):
                         )
                     ])}
                 """,
-                project=project_id,
-                location=location,
-                credentials=credentials,
             )
 
         if self.inserter.has_succeeded and self.api_client.has_succeeded:
