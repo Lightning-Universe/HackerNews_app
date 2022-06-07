@@ -1,8 +1,8 @@
 import torch
-from models.tanr import TANR
 from torch import nn, optim
 from torchmetrics import Accuracy, AUROC, MetricCollection
 
+from ml.recsys.models.tanr import TANR
 from pytorch_lightning import LightningModule
 
 
