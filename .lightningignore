@@ -165,5 +165,6 @@ lightning_logs
 *.pt
 *.pth
 *.ckpt
-
+*.json
+*.txt
 *.zip

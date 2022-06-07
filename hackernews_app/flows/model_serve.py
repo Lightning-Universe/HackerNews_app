@@ -1,7 +1,7 @@
 import lightning as L
 
 from hackernews_app.ui.home import home_ui
-from hackernews_app.works.fastapi import FastAPIWork
+from hackernews_app.works.fastapi import FastAPIServer
 
 
 class ModelServeFlow(L.LightningFlow):
@@ -10,7 +10,7 @@ class ModelServeFlow(L.LightningFlow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.server_one = FastAPIWork(module="fastapi_app", api_object="app")
+        self.server_one = FastAPIServer(parallel=True)
 
     def run(self):
         self.server_one.run()
