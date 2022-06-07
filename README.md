@@ -56,7 +56,7 @@ lightning run app app.py --cloud
 
 The current design runs a single batch prediction once against all users who favorited at least one story. We plan to introduce
 model training within the HackerNews app in the future, for now we're using the
-[PyTorch Lightning App](https://lightning.ai/app/AU3WoWwdAP-Train%20%26%20Deploy%20PyTorch%20Lightning) to train
+[PyTorch Lightning App](https://lightning.ai/app/WYU6CrDIAS-PyTorch%20Lightning%20App) to train
 models prior to loading their predictions into BigQuery:
 
 <details>
