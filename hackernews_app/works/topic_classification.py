@@ -13,8 +13,7 @@ class TopicClassification(L.LightningWork):
         self.topics = None
 
     def run(self, stories):
-        # topics = topic_predict([story["title"] for story in stories], self.weights_path)
-        topics = ["Technology"] * len(stories)
+        topics = topic_predict([story["title"] for story in stories], self.weights_path)
         created_time = dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
         topics = [
             {"story_id": story["id"], "topic": topic, "created_at": created_time}

@@ -92,6 +92,7 @@ def get_click_prediction(user_vec, story_vec, model):
 
 def generate_embeddings(stories, weights_path):
     df = pd.DataFrame(stories)
+    """
     news_embeddings = torch.randn(df.shape[0], 300).tolist()
     created_time = dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     news_embeddings = [
@@ -99,6 +100,7 @@ def generate_embeddings(stories, weights_path):
         for i, embed in enumerate(news_embeddings)
     ]
     return news_embeddings
+    """
 
     df["title"] = (
         df["title"]
@@ -108,12 +110,18 @@ def generate_embeddings(stories, weights_path):
         .str.strip()
     )
 
-    with fsspec.open(
-        f"filecache::s3://pl-public-data/hackernews_app/word2int.json",
-        s3={"anon": True},
-        filecache={"cache_storage": "/tmp/files"},
-    ) as fp:
+    # with fsspec.open(
+    #     f"filecache::s3://pl-public-data/hackernews_app/word2int.json",
+    #     s3={"anon": True},
+    #     filecache={"cache_storage": "/tmp/files"},
+    # ) as fp:
+    print('generating encoding.......')
+    print('starting reading vocab.....')
+
+    with open('data/word2int.json') as fp:
         word2int = json.load(fp)
+
+    print('vocab initialized.....')
 
     df["title"] = df["title"].apply(lambda x: tokenize(x, word2int))
     df = df.loc[df["title"].apply(len) > 0]
