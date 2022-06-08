@@ -101,6 +101,9 @@ def home_ui(lightning_app_state):
 
     st.set_page_config(page_title="HackerNews App", page_icon="⚡️", layout="centered")
 
+    # This is where the lightning app state is passed to the Streamlit UI.
+    # This allows the application to support multiple users.
+
     if "session_id" not in st.session_state:
         st.session_state["session_id"] = uuid.uuid1().hex
     if "username" not in st.session_state:

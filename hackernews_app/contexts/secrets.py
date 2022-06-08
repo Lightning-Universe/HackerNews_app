@@ -1,10 +1,20 @@
 """
 TODO: Replace with a proper secrets management.
 """
+import json
+import os
+
 from google.oauth2 import service_account
 
 
 def get_secrets():
+
+    if os.getenv("LIGHTNING__SECRETS"):
+        try:
+            json.loads(os.getenv("LIGHTNING__SECRETS"))
+        except json.decoder.JSONDecodeError:
+            logging.info("Unable to load secrets from environment.")
+
     return {
         "type": "service_account",
         "project_id": "eric-lightning-app",
