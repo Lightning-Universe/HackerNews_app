@@ -2,8 +2,8 @@ import time
 
 import lightning as L
 
-from hackernews_app.flows import HackerNewsUI
-from hackernews_app.flows.model_serve import ModelServeFlow
+from hackernews_app.flows import HackerNewsUI, AppStarting
+from hackernews_app.works.fastapi import FastAPIServer
 from hackernews_app.works.http import HTTPRequest
 
 
@@ -21,20 +21,24 @@ class HealthCheck(HTTPRequest):
 class HackerNews(L.LightningFlow):
     def __init__(self):
         super().__init__()
-        self.model_service = ModelServeFlow()
+        self.app_starting = AppStarting()
+        self.server = FastAPIServer(parallel=True)
         self.hackernews_ui = HackerNewsUI()
         self.health_check = HealthCheck(run_once=False)
 
     def run(self):
-        self.model_service.run()
+        self.server.run()
         if self.health_check.is_healthy is False:
-            self.health_check.get(f"{self.model_service.server_one.url}/healthz")
+            self.health_check.get(f"{self.server.url}/healthz")
             time.sleep(1)
-        if self.model_service.server_one.is_running and self.hackernews_ui.fastapi_url is None:
-            self.hackernews_ui.run(self.model_service.server_one.url)
+        if self.server.is_running and self.hackernews_ui.fastapi_url is None:
+            self.hackernews_ui.run(self.server.url)
 
     def configure_layout(self):
-        return {"name": "Home", "content": self.hackernews_ui}
+        if self.health_check.is_healthy:
+            return {"name": "Home", "content": self.hackernews_ui}
+        else:
+            return {"name": "Home", "content": self.app_starting}
 
 
 if __name__ == "__main__":
