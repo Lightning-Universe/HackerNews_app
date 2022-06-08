@@ -44,6 +44,11 @@ lightning run app app.py
 
 ## To run the app on the cloud to share it with your peers and users
 lightning run app app.py --cloud
+
+## To run the app with private gcp credentials in the cloud
+## To get a secrets file refer to https://cloud.google.com/iam/docs/creating-managing-service-account-keys
+export LIGHTNING__GCP_SECRETS=$(cat <PATH_TO_JSON_SECRETS_FILE>)
+lightning run app app.py --cloud --env LIGHTNING__GCP_SECRETS=$LIGHTNING__GCP_SECRETS
 ```
 
 ### User Journey

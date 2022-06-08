@@ -2,6 +2,7 @@
 TODO: Replace with a proper secrets management.
 """
 import json
+import logging
 import os
 
 from google.oauth2 import service_account
@@ -9,12 +10,13 @@ from google.oauth2 import service_account
 
 def get_secrets():
 
-    if os.getenv("LIGHTNING__SECRETS"):
+    if os.getenv("LIGHTNING__GCP_SECRETS"):
         try:
-            json.loads(os.getenv("LIGHTNING__SECRETS"))
+            return json.loads(os.getenv("LIGHTNING__GCP_SECRETS"))
         except json.decoder.JSONDecodeError:
             logging.info("Unable to load secrets from environment.")
 
+    logging.info("Using default dataset that is made public.")
     return {
         "type": "service_account",
         "project_id": "eric-lightning-app",
