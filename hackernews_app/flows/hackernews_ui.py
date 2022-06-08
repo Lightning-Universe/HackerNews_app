@@ -21,6 +21,8 @@ class HackerNewsUI(L.LightningFlow):
         self.fastapi_url = fastapi_url
 
     def configure_layout(self):
+        if self.fastapi_url is None:
+            return L.frontend.web.StaticWebFrontend(serve_dir="static/app_starting")
         return L.frontend.StreamlitFrontend(render_fn=hackernews_streamlit)
 
 
