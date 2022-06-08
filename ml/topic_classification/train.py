@@ -1,5 +1,6 @@
 import json
 
+import fsspec
 import pandas as pd
 
 from config import TopicClassificationConfig
@@ -8,11 +9,14 @@ from pytorch_lightning import seed_everything, Trainer
 
 if __name__ == "__main__":
     config = TopicClassificationConfig()
-
     seed_everything(7)
 
     data = []
-    with open("data/News_Category_Dataset_v2.json", encoding="utf-8") as json_lines_file:
+    with fsspec.open(
+        "filecache::s3://pl-public-data/hackernews_app/News_Category_Dataset_v2.json",
+        s3={"anon": True},
+        filecache={"cache_storage": "/tmp/files"},
+    ) as json_lines_file:
         for line in json_lines_file:
             data.append(json.loads(line))
 
@@ -28,5 +32,5 @@ if __name__ == "__main__":
     datamodule = NewsClassificationDataModule(df, model_name=config.model_name)
     model = NewsClassificationModule(num_classes=len(config.classes), model_name=config.model_name)
 
-    trainer = Trainer(max_epochs=5, devices=1, accelerator="gpu", auto_select_gpus=True)
+    trainer = Trainer(max_epochs=5)
     trainer.fit(model, datamodule=datamodule)

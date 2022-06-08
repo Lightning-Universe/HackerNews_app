@@ -1,8 +1,9 @@
 import torch
-from models.dot_product import DotProductClickPredictor
-from models.news_encoder import NewsEncoder
-from models.user_encoder import UserEncoder
 from torch import nn
+
+from ml.recsys.models.dot_product import DotProductClickPredictor
+from ml.recsys.models.news_encoder import NewsEncoder
+from ml.recsys.models.user_encoder import UserEncoder
 
 
 class TANR(nn.Module):
