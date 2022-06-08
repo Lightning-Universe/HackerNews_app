@@ -72,6 +72,7 @@ class HackerNewsLiveStories(L.LightningFlow):
                     json_rows=self.story_encoder.encodings,
                     table="hacker_news.story_embeddings",
                 )
+                print("encoding payload generated....")
 
             self.bq_inserter.insert(
                 json_rows=self.hn_data,
