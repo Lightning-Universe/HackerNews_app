@@ -12,7 +12,6 @@ from contextlib import redirect_stdout
 
 from lightning.testing.testing import application_testing, LightningTestApp
 
-os.environ["LAI_TEST"] = "true"
 
 
 class LightningAppTestInt(LightningTestApp):
