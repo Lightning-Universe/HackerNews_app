@@ -25,6 +25,7 @@ class LightningAppTestInt(LightningTestApp):
         return True
 
 
+@mock.patch.dict(os.environ, {"LAI_TEST": "True"}, clear=True)
 def test_hackernews_app():
     cwd = os.getcwd()
     cwd = os.path.join(cwd, "app.py")
