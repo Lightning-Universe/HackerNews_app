@@ -15,6 +15,10 @@ class HackerNewsUI(L.LightningFlow):
             "username": None,
             "user_status": False,
         }
+        self.fastapi_url = None
+
+    def run(self, fastapi_url):
+        self.fastapi_url = fastapi_url
 
     def configure_layout(self):
         return L.frontend.StreamlitFrontend(render_fn=hackernews_streamlit)
@@ -72,21 +76,21 @@ def home_page(state: AppState, text_elements: dict):
     intro = st.container()
 
     if not st.session_state.username:
-        intro.title(text_elements.welcome_title)
-        intro.subheader(text_elements.welcome_subheader)
-        st.session_state.username = intro.text_input("Username", placeholder=text_elements.text_input_placeholder)
+        intro.title(text_elements["welcome_title"])
+        intro.subheader(text_elements["welcome_subheader"])
+        st.session_state.username = intro.text_input("Username", placeholder=text_elements["text_input_placeholder"])
     else:
         recommendations_table(state)
         if (not st.session_state.user_status) and st.session_state.username:
-            intro.subheader(text_elements.not_found_error_subheader)
-            intro.error(f"{text_elements.not_found_error_message.format(username=st.session_state.username)}")
-            if intro.button(text_elements.not_found_error_try_different_username):
+            intro.subheader(text_elements["not_found_error_subheader"])
+            intro.error(f"{text_elements['not_found_error_message'].format(username=st.session_state.username)}")
+            if intro.button(text_elements["not_found_error_try_different_username"]):
                 st.session_state.username = None
                 st.session_state.user_status = False
         else:
-            intro.title(f"{text_elements.user_welcome_title.format(username=st.session_state.username)}")
-            intro.subheader(text_elements.user_welcome_subheader)
-            if intro.button(text_elements.user_welcome_try_different_username):
+            intro.title(f"{text_elements['user_welcome_title'].format(username=st.session_state.username)}")
+            intro.subheader(text_elements["user_welcome_subheader"])
+            if intro.button(text_elements["user_welcome_try_different_username"]):
                 st.session_state.username = None
                 st.session_state.user_status = False
 
@@ -108,7 +112,7 @@ def recommendations_table(state: AppState):
     if not st.session_state.username:
         return
 
-    df = get_user_recommendations(st.session_state.username, state.server_one.url)
+    df = get_user_recommendations(st.session_state.username, state.fastapi_url)
 
     if df is None:
         st.session_state.user_status = False

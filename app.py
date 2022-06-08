@@ -2,8 +2,8 @@ import time
 
 import lightning as L
 
-from hackernews_app.flows.model_serve import ModelServeFlow
 from hackernews_app.flows import HackerNewsUI
+from hackernews_app.flows.model_serve import ModelServeFlow
 from hackernews_app.works.http import HTTPRequest
 
 
@@ -30,6 +30,8 @@ class HackerNews(L.LightningFlow):
         if self.health_check.is_healthy is False:
             self.health_check.get(f"{self.model_service.server_one.url}/healthz")
             time.sleep(1)
+        if self.model_service.server_one.is_running and self.hackernews_ui.fastapi_url is None:
+            self.hackernews_ui.run(self.model_service.server_one.url)
 
     def configure_layout(self):
         return {"name": "Home", "content": self.hackernews_ui}
