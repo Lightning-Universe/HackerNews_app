@@ -1,3 +1,4 @@
+import os
 import time
 
 import lightning as L
@@ -27,7 +28,11 @@ class HackerNews(L.LightningFlow):
         self.health_check = HealthCheck(run_once=False)
 
     def run(self):
+        if os.environ.get("LAI_TEST"):
+            print("⚡ Lightning HackerNews App! ⚡")
+
         self.server.run()
+
         if self.health_check.is_healthy is False:
             self.health_check.get(f"{self.server.url}/healthz")
             time.sleep(1)
