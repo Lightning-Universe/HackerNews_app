@@ -165,3 +165,5 @@ lightning-*.tar.gz
 *.pt
 *.pth
 *.ckpt
+
+data/
