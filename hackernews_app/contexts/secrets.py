@@ -10,9 +10,9 @@ from google.oauth2 import service_account
 
 def get_secrets():
 
-    if os.getenv("LIGHTNING__GCP_SECRETS"):
+    if os.getenv("LIGHTNING__GCP_CREDENTIALS"):
         try:
-            return json.loads(os.getenv("LIGHTNING__GCP_SECRETS"))
+            return json.loads(os.getenv("LIGHTNING__GCP_CREDENTIALS"))
         except json.decoder.JSONDecodeError:
             logging.info("Unable to load secrets from environment.")
 
