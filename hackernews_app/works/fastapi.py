@@ -1,4 +1,5 @@
 import lightning as L
+import requests
 import uvicorn
 
 from hackernews_app.api.fastapi_app import app
