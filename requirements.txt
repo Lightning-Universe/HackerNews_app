@@ -13,5 +13,6 @@ db-dtypes==1.0.1
 transformers==4.19.2
 pytorch-lightning==1.6.4
 fsspec==2022.1.0
+git+ssh://git@github.com/PyTorchLightning/LAI-bigquery.git@3be3d5099cd882c11f0b6ef619435f8b1961b298
 # -e git+ssh://git@github.com/PyTorchLightning/google-cloud.git@9ab869e873bf75c9cbac3658af0b56fb10ee99b8#egg=lightning_gcp
 pytorch-lightning==1.6.4

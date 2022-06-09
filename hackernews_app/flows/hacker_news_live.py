@@ -54,22 +54,22 @@ class HackerNewsLiveStories(L.LightningFlow):
                     for data in self.item_getter.data
                 ]
         else:
-            stories = [row for row in self.hn_data if row["type"] == "story" and row["title"] is not None]
-            stories = [{"title": row["title"], "id": row["id"]} for row in stories]
+            # stories = [row for row in self.hn_data if row["type"] == "story" and row["title"] is not None]
+            # stories = [{"title": row["title"], "id": row["id"]} for row in stories]
 
-            if stories:
-                self.topic_classifier.run(stories)
-                self.story_encoder.run(stories)
+            # if stories:
+            #     self.topic_classifier.run(stories)
+            #     self.story_encoder.run(stories)
 
-                self.bq_inserter.insert(
-                    json_rows=self.topic_classifier.topics,
-                    table="hacker_news.story_topics",
-                )
+            #     self.bq_inserter.insert(
+            #         json_rows=self.topic_classifier.topics,
+            #         table="hacker_news.story_topics",
+            #     )
 
-                self.bq_inserter.insert(
-                    json_rows=self.story_encoder.encodings,
-                    table="hacker_news.story_embeddings",
-                )
+            #     self.bq_inserter.insert(
+            #         json_rows=self.story_encoder.encodings,
+            #         table="hacker_news.story_embeddings",
+            #     )
 
             self.bq_inserter.insert(
                 json_rows=self.hn_data,
