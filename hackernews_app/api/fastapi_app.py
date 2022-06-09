@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from typing import Dict
 
 from fastapi import FastAPI, Response, status
@@ -47,6 +48,9 @@ def recommend(data: Dict, response: Response):
     if not username:
         response.status_code = status.HTTP_400_BAD_REQUEST
         return {"data": "Requires a user, but user not found."}
+
+    # Handle special characters and single quotes
+    username = re.escape(username).replace("'", "\\'")
 
     query = f"""
     select

@@ -3,20 +3,9 @@ import time
 
 import lightning as L
 
-from hackernews_app.flows import HackerNewsUI, AppStarting
+from hackernews_app.flows import AppStarting, HackerNewsUI
 from hackernews_app.works.fastapi import FastAPIServer
 from hackernews_app.works.http import HTTPRequest
-
-
-class HealthCheck(HTTPRequest):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.is_healthy = False
-
-    def get(self, url):
-        if self.status_code == 200:
-            self.is_healthy = True
-        super().get(url)
 
 
 class HackerNews(L.LightningFlow):
@@ -40,10 +29,22 @@ class HackerNews(L.LightningFlow):
             self.hackernews_ui.run(self.server.url)
 
     def configure_layout(self):
+        # When the health check is successful.
         if self.health_check.is_healthy:
             return {"name": "Home", "content": self.hackernews_ui}
         else:
             return {"name": "Home", "content": self.app_starting}
+
+
+class HealthCheck(HTTPRequest):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.is_healthy = False
+
+    def get(self, url):
+        if self.status_code == 200:
+            self.is_healthy = True
+        super().get(url)
 
 
 if __name__ == "__main__":
