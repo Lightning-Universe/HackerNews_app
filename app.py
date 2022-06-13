@@ -14,7 +14,7 @@ class HackerNews(L.LightningFlow):
         self.app_starting = AppStarting()
         self.server = FastAPIServer(parallel=True)
         self.hackernews_ui = HackerNewsUI()
-        self.health_check = HealthCheck(run_once=False)
+        self.health_check = HealthCheck(cache_calls=False)
 
     def run(self):
         if os.environ.get("LAI_TEST"):
