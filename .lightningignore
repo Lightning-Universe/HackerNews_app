@@ -167,3 +167,5 @@ lightning_logs
 *.ckpt
 
 *.zip
+
+data/

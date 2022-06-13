@@ -4,10 +4,13 @@ import time
 import lightning as L
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 from hackernews_app.flows import AppStarting, HackerNewsUI
 from hackernews_app.works.fastapi import FastAPIServer
 =======
 from hackernews_app.contexts.secrets import get_secrets, LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS
+=======
+>>>>>>> a82ccf8 (Use extenal BQ component (#30))
 from hackernews_app.flows.hacker_news_live import HackerNewsLiveStories
 from hackernews_app.flows.model_serve import ModelServeFlow
 from hackernews_app.ui.app_starting import AppStarting
@@ -22,8 +25,10 @@ class HackerNews(L.LightningFlow):
         self.server = FastAPIServer(parallel=True)
         self.hackernews_ui = HackerNewsUI()
         self.health_check = HealthCheck(cache_calls=False)
+        self.hn_live_stream = HackerNewsLiveStories(topic="hn_stream", time_interval=5)
 
     def run(self):
+        self.hn_live_stream.run()
         if os.environ.get("LAI_TEST"):
             print("⚡ Lightning HackerNews App! ⚡")
 
