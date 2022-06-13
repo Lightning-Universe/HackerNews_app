@@ -3,18 +3,9 @@ import time
 
 import lightning as L
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 from hackernews_app.flows import AppStarting, HackerNewsUI
-from hackernews_app.works.fastapi import FastAPIServer
-=======
-from hackernews_app.contexts.secrets import get_secrets, LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS
-=======
->>>>>>> a82ccf8 (Use extenal BQ component (#30))
 from hackernews_app.flows.hacker_news_live import HackerNewsLiveStories
-from hackernews_app.flows.model_serve import ModelServeFlow
-from hackernews_app.ui.app_starting import AppStarting
->>>>>>> ca3563f (update)
+from hackernews_app.works.fastapi import FastAPIServer
 from hackernews_app.works.http import HTTPRequest
 
 
