@@ -1,10 +1,10 @@
+import datetime as dt
 import json
 import logging
 import re
 from typing import Dict
 
-import numpy as np
-import pandas as pd
+import fsspec
 from fastapi import FastAPI, Response, status
 from google.cloud import bigquery
 
@@ -46,7 +46,6 @@ def recommend(payload: Dict, response: Response):
                 creation_date: STRING
             }
         ],
-        type: "top"|"recommendation"
     }
     """
 
@@ -62,43 +61,57 @@ def recommend(payload: Dict, response: Response):
     WHERE _rank = 1;
     """
 
+    new_stories_data = """
+    SELECT se.story_id, se.embeddings, st.topic, si.title, si.time
+    FROM hacker_news.story_embeddings se
+    INNER JOIN hacker_news.story_topics st ON st.story_id = se.story_id
+    INNER JOIN hacker_news.items si ON si.id = se.story_id
+    ORDER BY se.created_at DESC
+    LIMIT 100
+    """
+
     client = bigquery.Client(BQ_PROJECT, credentials=LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS)
     cursor = client.query(user_embed_query, location=BQ_LOCATION)
-    print(dir(cursor.result()))
     user_vec = cursor.result().to_dataframe()
-    print(user_vec)
 
-    # random data
-    user_vec = np.random.randn(300).tolist()
-    stories = pd.DataFrame(
-        {
-            "title": ["This is a tech article"] * 100,
-            "url": ["https://pytorch-lightning.readthedocs.io/en/stable/"] * 100,
-            "creation_date": ["2022-01-01"] * 100,
-            "topic": ["Tech"] * 100,
-            "embed": [[0.234] * 300] * 100,
+    if user_vec.shape[0] == 0:
+        return {
+            "results": None,
         }
-    )
-    #
 
-    story_vec = stories["embed"].tolist()
+    user_vec = user_vec["user_embeddings"].iloc[0]["embeddings"]
+
+    cursor = client.query(new_stories_data, location=BQ_LOCATION)
+    new_stories_df = cursor.result().to_dataframe()
+
+    new_stories_df = new_stories_df.drop_duplicates(subset=["story_id"])
+    new_stories_df = new_stories_df.rename(columns={"time": "creation_date"})
+    new_stories_df["creation_date"] = new_stories_df["creation_date"].apply(
+        lambda ts: dt.datetime.utcfromtimestamp(ts).strftime("%Y-%m-%d")
+    )
+    new_stories_df["url"] = new_stories_df["story_id"].apply(lambda x: f"https://news.ycombinator.com/item?id={x}")
+    new_stories_df = new_stories_df.drop("story_id", axis=1)
+
+    story_vec = new_stories_df["embeddings"].tolist()
+
     global recsys_model
-    stories["pred"] = get_click_prediction(user_vec, story_vec, recsys_model)
-    stories = stories.sort_values(by="pred", ascending=False).head(50)
-    stories = stories.drop(["pred", "embed"], axis=1)
-    response = {
-        "results": stories,
-        "type": "recommendation",
+    new_stories_df["pred"] = get_click_prediction(user_vec, story_vec, recsys_model)
+    new_stories_df = new_stories_df.sort_values(by="pred", ascending=False).head(50)
+    new_stories_df = new_stories_df.drop(["pred", "embeddings"], axis=1)
+    return {
+        "results": new_stories_df,
     }
-    return response
 
 
 @app.post("/api/update_recsys_weights")
 def update_model(payload: Dict):
     global recsys_model
 
-    # TODO: Update the word2int here (@rohitgr7)
-    with open("data/word2int.json") as fp:
+    with fsspec.open(
+        "filecache::s3://pl-public-data/hackernews_app/word2int.json",
+        s3={"anon": True},
+        filecache={"cache_storage": "/tmp/files"},
+    ) as fp:
         word2int = json.load(fp)
 
     config = TANRConfig()

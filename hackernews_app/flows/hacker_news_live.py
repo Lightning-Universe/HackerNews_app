@@ -55,9 +55,7 @@ class HackerNewsLiveStories(L.LightningFlow):
                 ]
         else:
             stories = [row for row in self.hn_data if row["type"] == "story" and row["title"] is not None]
-            stories = [{"title": row["title"], "id": row["id"]} for row in stories]
-
-            stories = [{"title": "The Tech blog published a new article", "id": str(i + 1000)} for i in range(5)]
+            stories = [{"title": row["title"], "id": str(row["id"])} for row in stories]
 
             if stories:
                 self.topic_classifier.run(stories)

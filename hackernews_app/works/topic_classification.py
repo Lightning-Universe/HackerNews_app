@@ -8,8 +8,7 @@ from ml.topic_classification.inference import predict as topic_predict
 class TopicClassification(L.LightningWork):
     def __init__(self, weights_path):
         super().__init__()
-        # TODO: provide proper weights_path (@rohitgr7)
-        self.weights_path = "ml/topic_classification/epoch=4-step=25110.ckpt"
+        self.weights_path = "https://pl-public-data.s3.amazonaws.com/hackernews_app/epoch=4-step=25110.ckpt"
         self.topics = None
 
     def run(self, stories):
