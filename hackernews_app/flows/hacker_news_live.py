@@ -27,12 +27,12 @@ class HackerNewsLiveStories(L.LightningFlow):
         super().__init__()
         secrets = get_secrets()
         self.time_interval = time_interval
-        self.item_getter = HackerNewsGetItem(secrets["project_id"], topic, run_once=False)
+        self.item_getter = HackerNewsGetItem(secrets["project_id"], topic, cache_calls=False)
         self.subscriber = HackerNewsSubscriber(
             project_id=secrets["project_id"],
             topic_name=self.item_getter.topic_name,
             subscription="hacker-news-items-subscription",
-            run_once=False,
+            cache_calls=False,
         )
         self.bq_inserter = BigQuery(project=secrets["project_id"], location="US", credentials=secrets)
         self.is_bq_inserting = False
@@ -121,7 +121,7 @@ class HackerNewsHourly(L.LightningFlow):
         # Run one time to get the data we need.
         secrets = get_secrets()
         self.last_group_getter = BigQuery(project=secrets["project_id"], location="US", credentials=secrets)
-        self.last_group_loader = LastGroupLoader(run_once=True)
+        self.last_group_loader = LastGroupLoader()
 
         # Recurring runs
         self.api_client = HackerNewsRequestAPI()
