@@ -24,7 +24,9 @@ class HackerNews(L.LightningFlow):
 
         # Wait for the fastapi server to start before launching the UI
         if self.health_check.is_healthy is False:
-            self.health_check.get(f"{self.server.url}/healthz")
+            if self.server.url:
+                self.health_check.get(f"{self.server.url}/healthz")
+            print("Waiting for the server to start.....")
             time.sleep(1)
         else:
             self.hackernews_ui.run(self.server.url)
