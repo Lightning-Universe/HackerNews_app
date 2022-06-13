@@ -57,7 +57,7 @@ class HackerNewsLiveStories(L.LightningFlow):
             stories = [row for row in self.hn_data if row["type"] == "story" and row["title"] is not None]
             stories = [{"title": row["title"], "id": row["id"]} for row in stories]
 
-            stories = [{"title": "The Tech blog published a new article", "id": str(i)} for i in range(5)]
+            stories = [{"title": "The Tech blog published a new article", "id": str(i + 1000)} for i in range(5)]
 
             if stories:
                 self.topic_classifier.run(stories)
@@ -72,7 +72,6 @@ class HackerNewsLiveStories(L.LightningFlow):
                     json_rows=self.story_encoder.encodings,
                     table="hacker_news.story_embeddings",
                 )
-                print("encoding payload generated....")
 
             self.bq_inserter.insert(
                 json_rows=self.hn_data,

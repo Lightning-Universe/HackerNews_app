@@ -50,11 +50,12 @@ def recommend(payload: Dict, response: Response):
     }
     """
 
+    username = payload["username"]
     user_embed_query = f"""
     with ranked_embeddings as (
         SELECT user_embeddings, rank() OVER (PARTITION BY username ORDER BY created_at desc) _rank
         FROM hacker_news.user_embeddings
-        WHERE username = {payload['username']}
+        WHERE username = '{username}'
     )
     SELECT user_embeddings
     FROM ranked_embeddings
@@ -67,7 +68,7 @@ def recommend(payload: Dict, response: Response):
     user_vec = cursor.result().to_dataframe()
     print(user_vec)
 
-    ####### random data
+    # random data
     user_vec = np.random.randn(300).tolist()
     stories = pd.DataFrame(
         {
@@ -78,7 +79,7 @@ def recommend(payload: Dict, response: Response):
             "embed": [[0.234] * 300] * 100,
         }
     )
-    ##########
+    #
 
     story_vec = stories["embed"].tolist()
     global recsys_model
