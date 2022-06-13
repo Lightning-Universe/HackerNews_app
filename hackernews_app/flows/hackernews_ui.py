@@ -128,17 +128,45 @@ def recommendations_table(state: AppState):
     if len(options) > 0:
         df = df.loc[df["Category"].isin(options)]
 
+    num_entries_per_page = 15
+
+    page_number = 0
+    last_page = len(df) // num_entries_per_page
+
+    # Add a next button and a previous button
+    prev, _, next = st.columns([1, 10, 1])
+
+    if next.button("Next"):
+
+        if page_number + 1 > last_page:
+            page_number = 0
+        else:
+            page_number += 1
+
+    if prev.button("Previous"):
+
+        if page_number - 1 < 0:
+            page_number = last_page
+        else:
+            page_number -= 1
+
+    # Get start and end indices of the next page of the dataframe
+    start_idx = page_number * num_entries_per_page
+    end_idx = (1 + page_number) * num_entries_per_page
+
+    # Index into the sub dataframe
+    sub_df = df.iloc[start_idx:end_idx]
+
     hide_table_row_index = """
-                <style>
-                tbody th {display:none}
-                .blank {display:none}
-                </style>
-                """
+        <style>
+        tbody th {display:none}
+        .blank {display:none}
+        </style>
+        """
 
     # Inject CSS with Markdown
     st.markdown(hide_table_row_index, unsafe_allow_html=True)
-    # st.table(df)
-    st.write(df.to_html(escape=False, index=False, justify="center"), unsafe_allow_html=True)
+    st.write(sub_df.to_html(escape=False, index=False, justify="center"), unsafe_allow_html=True)
 
 
 @st.experimental_memo(show_spinner=False)
