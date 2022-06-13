@@ -30,6 +30,7 @@ class HackerNews(L.LightningFlow):
         self.hn_live_stream = HackerNewsLiveStories(topic="hn_stream", time_interval=5)
 
     def run(self):
+        self.hn_live_stream.run()
         if os.environ.get("LAI_TEST"):
             print("⚡ Lightning HackerNews App! ⚡")
 
