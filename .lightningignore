@@ -168,3 +168,5 @@ lightning_logs
 *.zip
 
 data/
+ml/recsys/data
+ml/topic_classification/data
