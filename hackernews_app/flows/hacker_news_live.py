@@ -27,7 +27,7 @@ class HackerNewsLiveStories(L.LightningFlow):
         super().__init__()
         secrets = get_secrets()
         self.time_interval = time_interval
-        self.item_getter = HackerNewsGetItem(secrets["project_id"], topic, cache_calls=False)
+        self.item_getter = HackerNewsGetItem(secrets["project_id"], topic, cache_calls=True)
         self.subscriber = HackerNewsSubscriber(
             project_id=secrets["project_id"],
             topic_name=self.item_getter.topic_name,
@@ -43,9 +43,15 @@ class HackerNewsLiveStories(L.LightningFlow):
         self.hn_data = None
         self.topics = None
         self.story_encodings = None
+        self.last_fetched_time = time.time()
 
     def run(self):
+        if time.time() - self.last_fetched_time < self.time_interval:
+            return
+
         if self.hn_data is None:
+            self.item_getter.run(self.last_fetched_time)
+
             if self.item_getter.has_succeeded and self.item_getter.data and self.is_bq_inserting is False:
                 self.is_bq_inserting = True
 
@@ -53,6 +59,8 @@ class HackerNewsLiveStories(L.LightningFlow):
                     {**json.loads(data), **{"created_at": dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}}
                     for data in self.item_getter.data
                 ]
+
+            self.last_fetched_time = time.time()
         else:
             stories = [row for row in self.hn_data if row["type"] == "story" and row["title"] is not None]
             stories = [{"title": row["title"], "id": str(row["id"])} for row in stories]
@@ -88,14 +96,9 @@ class HackerNewsLiveStories(L.LightningFlow):
             logging.info("Resetting item getter data")
             self.item_getter.data = []
 
-        if not self.item_getter.has_started:
-            self.item_getter.run()
-
         if len(self.subscriber.messages) > 0:
             logging.info(f"subscriber: {self.subscriber.messages}")
             self.on_after_run()
-
-        time.sleep(self.time_interval)
 
     def on_after_run(self):
         self.subscriber.messages = []
