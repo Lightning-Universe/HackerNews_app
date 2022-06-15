@@ -4,8 +4,8 @@ import lightning as L
 import pandas as pd
 import requests
 import streamlit as st
-from lightning.utilities.state import AppState
 from lightning.app.frontend import StreamlitFrontend
+from lightning.utilities.state import AppState
 
 
 class HackerNewsUI(L.LightningFlow):
