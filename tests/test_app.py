@@ -12,7 +12,7 @@ from contextlib import redirect_stdout
 from unittest import mock
 
 import pytest
-from lightning.testing.testing import application_testing, LightningTestApp
+from lightning.app.testing.testing import application_testing, LightningTestApp
 
 
 class LightningAppTestInt(LightningTestApp):
