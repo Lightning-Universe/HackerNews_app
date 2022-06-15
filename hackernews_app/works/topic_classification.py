@@ -1,9 +1,9 @@
-from lightning import LightningWork
+import lightning as L
 
 from ml.topic_classification.inference import predict as topic_predict
 
 
-class TopicClassification(LightningWork):
+class TopicClassification(L.LightningWork):
     def __init__(self, weights_path):
         super().__init__()
         self.weights_path = weights_path
