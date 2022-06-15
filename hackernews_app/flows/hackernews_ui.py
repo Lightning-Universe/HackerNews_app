@@ -4,7 +4,8 @@ import lightning as L
 import pandas as pd
 import requests
 import streamlit as st
-from lightning.utilities.state import AppState
+from lightning.app.frontend import StreamlitFrontend
+from lightning.app.utilities.state import AppState
 
 
 class HackerNewsUI(L.LightningFlow):
@@ -21,7 +22,7 @@ class HackerNewsUI(L.LightningFlow):
         self.fastapi_url = fastapi_url
 
     def configure_layout(self):
-        return L.frontend.StreamlitFrontend(render_fn=hackernews_streamlit)
+        return StreamlitFrontend(render_fn=hackernews_streamlit)
 
 
 TEXT_ELEMENTS = {
