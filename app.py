@@ -19,7 +19,6 @@ class HackerNews(L.LightningFlow):
         self.hn_live_stream = HackerNewsLiveStories(topic="hn_stream", time_interval=5)
 
     def run(self):
-        self.hn_live_stream.run()
         if os.environ.get("LAI_TEST"):
             print("⚡ Lightning HackerNews App! ⚡")
 
@@ -33,6 +32,8 @@ class HackerNews(L.LightningFlow):
             time.sleep(1)
         else:
             self.hackernews_ui.run(self.model_serve.server.url)
+
+        self.hn_live_stream.run()
 
     def configure_layout(self):
         # When the health check is successful.

@@ -1,7 +1,6 @@
 import datetime as dt
 import json
 import logging
-import re
 from typing import Dict
 
 import fsspec
@@ -62,12 +61,27 @@ def recommend(payload: Dict, response: Response):
     """
 
     new_stories_data = """
+    WITH ranked_embeddings AS (
+        SELECT story_id, embeddings, created_at, rank() OVER (PARTITION BY story_id ORDER BY created_at DESC) _rank
+        FROM hacker_news.story_embeddings
+    )
+    , unique_stories AS (
+        SELECT DISTINCT story_id,
+        LAST_VALUE(topic) OVER (PARTITION BY story_id ORDER BY story_id, created_at DESC) topic
+        FROM hacker_news.story_topics
+    ), unique_items AS (
+        SELECT DISTINCT id, LAST_VALUE(title) OVER (PARTITION BY id ORDER BY id, created_at DESC) title,
+        LAST_VALUE(time) OVER (partition by id ORDER BY id, created_at DESC) time
+        FROM hacker_news.items
+        WHERE type = 'story'
+    )
     SELECT se.story_id, se.embeddings, st.topic, si.title, si.time
-    FROM hacker_news.story_embeddings se
-    INNER JOIN hacker_news.story_topics st ON st.story_id = se.story_id
-    INNER JOIN hacker_news.items si ON si.id = se.story_id
+    FROM ranked_embeddings se
+    INNER JOIN unique_stories st ON st.story_id = se.story_id
+    INNER JOIN unique_items si ON si.id = se.story_id
+    WHERE se._rank = 1
     ORDER BY se.created_at DESC
-    LIMIT 100
+    LIMIT 100;
     """
 
     client = bigquery.Client(BQ_PROJECT, credentials=LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS)
@@ -84,7 +98,6 @@ def recommend(payload: Dict, response: Response):
     cursor = client.query(new_stories_data, location=BQ_LOCATION)
     new_stories_df = cursor.result().to_dataframe()
 
-    new_stories_df = new_stories_df.drop_duplicates(subset=["story_id"])
     new_stories_df = new_stories_df.rename(columns={"time": "creation_date"})
     new_stories_df["creation_date"] = new_stories_df["creation_date"].apply(
         lambda ts: dt.datetime.utcfromtimestamp(ts).strftime("%Y-%m-%d")
@@ -96,7 +109,7 @@ def recommend(payload: Dict, response: Response):
 
     global recsys_model
     new_stories_df["pred"] = get_click_prediction(user_vec, story_vec, recsys_model)
-    new_stories_df = new_stories_df.sort_values(by="pred", ascending=False).head(50)
+    new_stories_df = new_stories_df.sort_values(by="pred", ascending=False)
     new_stories_df = new_stories_df.drop(["pred", "embeddings"], axis=1)
     return {
         "results": new_stories_df,
