@@ -1,6 +1,7 @@
 import datetime as dt
 
 import lightning as L
+from lightning.app.storage import Payload
 
 from ml.topic_classification.inference import predict as topic_predict
 
@@ -18,4 +19,4 @@ class TopicClassification(L.LightningWork):
             {"story_id": story["id"], "topic": topic, "created_at": created_time}
             for story, topic in zip(stories, topics)
         ]
-        self.topics = L.storage.Payload(topics)
+        self.topics = Payload(topics)
