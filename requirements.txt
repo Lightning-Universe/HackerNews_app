@@ -10,3 +10,4 @@ transformers==4.19.2
 pytorch-lightning==1.6.4
 fsspec==2022.1.0
 pytorch-lightning==1.6.4
+lightning
