@@ -1,13 +1,8 @@
-import datetime as dt
 import json
 import logging
 import urllib
-from concurrent import futures
-from typing import Callable
 
-import google
 import lightning as L
-from google.cloud import pubsub_v1
 
 from hackernews_app.api import RESTAPI
 from hackernews_app.api.hackernews import constants
@@ -31,18 +26,6 @@ STORIES_SCHEMA = [
 ]
 
 
-class HackerNewsRequestAPI(L.LightningWork):
-    def __init__(self):
-        super().__init__()
-        self.base_url = constants.HACKERNEWS_BASEURL
-        self.response_data = {}
-
-    def run(self, path: str):
-        client = RESTAPI(self.base_url)
-        response = client.get(path)
-        self.response_data = response.json()
-
-
 class HackerNewsGetItem(L.LightningWork):
     """Gets new stories.
 
@@ -54,16 +37,16 @@ class HackerNewsGetItem(L.LightningWork):
         super().__init__(*args, **kwargs)
         self.base_url = constants.HACKERNEWS_BASEURL
         self.data = []
-        self.max_item = 31579975  # TODO: hack, replace it with data fetch from BQ (@Eric)
+        self.max_item = 31579997  # TODO: hack, replace it with data fetch from BQ (@Eric)
         self.project_id = project_id
         self.topic = topic
         self.topic_name = f"projects/{project_id}/topics/{topic}"
         self.publish_timeout = 60
-        self.max_stories = 2
+        self.max_stories = 20
         self.num_stories = 0
+        self.fetching = False
 
-    def run(self):
-
+    def run(self, sometime):
         client = RESTAPI(self.base_url)
 
         if self.max_item is None:
@@ -91,102 +74,9 @@ class HackerNewsGetItem(L.LightningWork):
             _data.update(data)
             _data = {k: _data[k] for k in STORIES_SCHEMA}
             self.data = [*self.data, json.dumps(_data)]
-            logging.info(f"Found a new item: {data}")
+            # logging.info(f"Found a new item: {data}")
             logging.info(f"The last item retrieved: {self.max_item}")
             self.max_item += 1
             self.num_stories += 1
 
-    def publish(self):
-
-        publisher = pubsub_v1.PublisherClient()
-        publish_futures = []
-        try:
-            publisher.create_topic(name=self.topic_name)
-        except google.api_core.exceptions.AlreadyExists as _message:
-            logging.info(_message)
-
-        def get_callback(
-            publish_future: pubsub_v1.publisher.futures.Future, data: str
-        ) -> Callable[[pubsub_v1.publisher.futures.Future], None]:
-            def callback(publish_future: pubsub_v1.publisher.futures.Future) -> None:
-                try:
-                    # Wait self.publish_timeout seconds for the publish call to succeed.
-                    print(publish_future.result(timeout=self.publish_timeout))
-                except futures.TimeoutError:
-                    print(f"Publishing {data} timed out.")
-
-            return callback
-
-        for message in self.data:
-
-            print(f"Message published: {message}")
-
-            future = publisher.publish(self.topic_name, message)
-            future.add_done_callback(get_callback(future, message))
-            publish_futures.append(future)
-
-        futures.wait(publish_futures, return_when=futures.ALL_COMPLETED)
-
-
-class HackerNewsSubscriber(L.LightningWork):
-    def __init__(self, project_id, topic_name, subscription="hacker-news-items-subscription", *args, **kwargs):
-        super().__init__(self, *args, **kwargs)
-        self.project_id = project_id
-        self.topic_name = topic_name
-        self.subscription = subscription
-        self.subscription_name = f"projects/{project_id}/subscriptions/{subscription}"
-        self.messages = []
-        self.unacknowledged = 0
-
-    def run(self):
-        # print("Running Subscriber")
-        # def callback(message):
-        #     message.ack()
-        #
-        # with pubsub_v1.SubscriberClient() as subscriber:
-        #     try:
-        #         subscriber.create_subscription(
-        #             name=self.subscription_name, topic=self.topic_name)
-        #     except google.api_core.exceptions.AlreadyExists as _message:
-        #         logging.info(_message)
-        #     streaming_pull_future = subscriber.subscribe(self.subscription_name, callback=callback)
-        #
-        #     try:
-        #         # When `timeout` is not set, result() will block indefinitely,
-        #         # unless an exception is encountered first.
-        #         self.messages = streaming_pull_future.result(timeout=60)
-        #     except TimeoutError:
-        #         streaming_pull_future.cancel()
-
-        # TODO: look into why async subscriber doesn't work
-        with pubsub_v1.SubscriberClient() as subscriber:
-            subscription_path = subscriber.subscription_path(self.project_id, self.subscription)
-            response = subscriber.pull(
-                request={
-                    "subscription": subscription_path,
-                    "max_messages": 10,
-                }
-            )
-            ack_ids = []
-            for msg in response.received_messages:
-                print(f"msg.message.data: {msg.message.data}")
-                if not msg.message.data:
-                    return
-
-                # TODO: Extremely hacky because of the limitations with passing data between works.
-                message = msg.message.data.decode("utf-8").lstrip("b'").rstrip("\\'")
-
-                self.messages = [
-                    *self.messages,
-                    {**json.loads(message), **{"created_at": dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}},
-                ]
-                ack_ids.append(msg.ack_id)
-
-            if len(ack_ids) < 0:
-                return
-            subscriber.acknowledge(
-                request={
-                    "subscription": subscription_path,
-                    "ack_ids": ack_ids,
-                }
-            )
+        self.num_stories = 0

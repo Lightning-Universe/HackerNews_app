@@ -165,7 +165,8 @@ lightning_logs
 *.pt
 *.pth
 *.ckpt
-
 *.zip
 
 data/
+ml/recsys/data
+ml/topic_classification/data
