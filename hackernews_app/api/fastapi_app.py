@@ -140,5 +140,5 @@ def get_max_id():
     """
     client = bigquery.Client(BQ_PROJECT, credentials=LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS)
     cursor = client.query(query, location=BQ_LOCATION)
-    max_item_id = cursor.result().to_dataframe()
-    return {"max_item_id": max_item_id.iloc[0, 0]}
+    max_item_id = next(cursor.result())[0]
+    return {"max_item_id": max_item_id}
