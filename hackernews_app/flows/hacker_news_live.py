@@ -34,12 +34,12 @@ class HackerNewsLiveStories(L.LightningFlow):
         self.hn_data = None
         self.last_fetched_time = -10000000
 
-    def run(self):
+    def run(self, url: str):
         if time.time() - self.last_fetched_time < self.time_interval:
             return
 
         if self.hn_data is None:
-            self.item_getter.run(self.last_fetched_time)
+            self.item_getter.run(self.last_fetched_time, url)
 
             self.hn_data = [
                 {**json.loads(data), **{"created_at": dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}}

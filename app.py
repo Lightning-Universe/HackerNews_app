@@ -32,8 +32,7 @@ class HackerNews(L.LightningFlow):
             time.sleep(1)
         else:
             self.hackernews_ui.run(self.model_serve.server.url)
-
-        self.hn_live_stream.run()
+            self.hn_live_stream.run(self.model_serve.server.url)
 
     def configure_layout(self):
         # When the health check is successful.

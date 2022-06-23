@@ -1,8 +1,10 @@
 import json
 import logging
 import urllib
+from typing import Any
 
 import lightning as L
+import requests
 
 from hackernews_app.api import RESTAPI
 from hackernews_app.api.hackernews import constants
@@ -37,7 +39,7 @@ class HackerNewsGetItem(L.LightningWork):
         super().__init__(*args, **kwargs)
         self.base_url = constants.HACKERNEWS_BASEURL
         self.data = []
-        self.max_item = 31579997  # TODO: hack, replace it with data fetch from BQ (@Eric)
+        self.max_item = None
         self.project_id = project_id
         self.topic = topic
         self.topic_name = f"projects/{project_id}/topics/{topic}"
@@ -46,7 +48,11 @@ class HackerNewsGetItem(L.LightningWork):
         self.num_stories = 0
         self.fetching = False
 
-    def run(self, sometime):
+    def run(self, _: Any, url: str):
+        if self.max_item is None:
+            response = requests.get(f"{url}/api/max_item_id")
+            self.max_item = int(response.json()["max_item_id"]) + 1
+
         client = RESTAPI(self.base_url)
 
         if self.max_item is None:

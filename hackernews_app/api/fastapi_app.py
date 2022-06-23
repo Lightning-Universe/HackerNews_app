@@ -131,3 +131,14 @@ def update_model(payload: Dict):
     config.num_words = len(word2int) + 1  # PAD
 
     recsys_model = TANRModule.load_from_checkpoint(payload["weights_path"], config=config)
+
+
+@app.get("/api/max_item_id")
+def get_max_id():
+    query = """
+    SELECT MAX(id) FROM hacker_news.items LIMIT 1000
+    """
+    client = bigquery.Client(BQ_PROJECT, credentials=LIGHTNING__GCP_SERVICE_ACCOUNT_CREDS)
+    cursor = client.query(query, location=BQ_LOCATION)
+    max_item_id = cursor.result().to_dataframe()
+    return {"max_item_id": max_item_id.iloc[0, 0]}
