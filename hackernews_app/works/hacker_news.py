@@ -39,7 +39,7 @@ class HackerNewsGetItem(L.LightningWork):
         super().__init__(*args, **kwargs)
         self.base_url = constants.HACKERNEWS_BASEURL
         self.data = []
-        self.max_item = None
+        self.max_item_id = None
         self.project_id = project_id
         self.topic = topic
         self.topic_name = f"projects/{project_id}/topics/{topic}"
@@ -49,25 +49,25 @@ class HackerNewsGetItem(L.LightningWork):
         self.fetching = False
 
     def run(self, _: Any, url: str):
-        if self.max_item is None:
+        if self.max_item_id is None:
             response = requests.get(f"{url}/api/max_item_id")
-            self.max_item = int(response.json()["max_item_id"]) + 1
+            self.max_item_id = int(response.json()["max_item_id"]) + 1
 
         client = RESTAPI(self.base_url)
 
-        if self.max_item is None:
+        if self.max_item_id is None:
             response = client.get(constants.HACKERNEWS_MAX_ITEM_ENDPOINT)
             if response.status_code == 200:
-                self.max_item = response.json()
+                self.max_item_id = response.json()
 
         while self.num_stories < self.max_stories:
             _data = {col: None for col in STORIES_SCHEMA}
 
-            response = client.get(constants.HACKERNEWS_ITEMS_ENDPOINT.format(id=self.max_item))
+            response = client.get(constants.HACKERNEWS_ITEMS_ENDPOINT.format(id=self.max_item_id))
             data = response.json()
 
             if response.status_code != 200 or data is None:
-                logging.info(f"Did not see anything. The last item retrieved: {self.max_item}")
+                logging.info(f"Did not see anything. The last item retrieved: {self.max_item_id}")
                 # TODO: revisit when there is time to look into using the Payload API for serializing bytes
                 #       The current implementation can publish the text but there is some decoding issues from
                 #       the subscriber.
@@ -81,8 +81,8 @@ class HackerNewsGetItem(L.LightningWork):
             _data = {k: _data[k] for k in STORIES_SCHEMA}
             self.data = [*self.data, json.dumps(_data)]
             # logging.info(f"Found a new item: {data}")
-            logging.info(f"The last item retrieved: {self.max_item}")
-            self.max_item += 1
+            logging.info(f"The last item retrieved: {self.max_item_id}")
+            self.max_item_id += 1
             self.num_stories += 1
 
         self.num_stories = 0
