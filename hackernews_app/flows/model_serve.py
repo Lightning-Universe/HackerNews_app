@@ -12,7 +12,6 @@ class ModelServe(L.LightningFlow):
 
     def run(self):
         self.server.run()
-        print("run tests")
 
         if self.weights_path is None and self.server.url:
             # TODO: provide proper weights_path (@rohitgr7)
