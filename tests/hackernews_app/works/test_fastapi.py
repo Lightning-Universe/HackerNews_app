@@ -22,6 +22,8 @@ def test_noroot():
 
 @patch("google.cloud.bigquery.Client.query")
 def test_recommend_status(mockquery):
+    weights_path = "https://pl-public-data.s3.amazonaws.com/hackernews_app/recsys_model_weights.ckpt"
+    client.post("/api/update_recsys_weights", json={"weights_path": weights_path})
     response = client.post("/api/recommend", json={"username": "eric"})
 
     # Establish that a query would've been executed.
@@ -35,6 +37,8 @@ def test_recommend_status(mockquery):
 
 @patch("google.cloud.bigquery.Client.query")
 def test_recommend_dtypes(mockquery):
+    weights_path = "https://pl-public-data.s3.amazonaws.com/hackernews_app/recsys_model_weights.ckpt"
+    client.post("/api/update_recsys_weights", json={"weights_path": weights_path})
     response = client.post("/api/recommend", json={"username": "eric"})
     data = response.json()
 
