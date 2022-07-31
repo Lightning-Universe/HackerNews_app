@@ -15,8 +15,11 @@ class HackerNewsUI(L.LightningFlow):
         self.multi_user_states = {
             "username": None,
             "user_status": False,
+            "page_number": 0,
         }
         self.fastapi_url = None
+        # Number of entries per page for the recommendation table
+        self.num_entries_per_page = 15
 
     def run(self, fastapi_url):
         self.fastapi_url = fastapi_url
@@ -128,17 +131,40 @@ def recommendations_table(state: AppState):
     if len(options) > 0:
         df = df.loc[df["Category"].isin(options)]
 
+    last_page = len(df) // state.num_entries_per_page
+
+    # Add a next button and a previous button
+    prev, _, next = st.columns([1, 10, 1])
+
+    if next.button("Next"):
+        if st.session_state.page_number + 1 > last_page:
+            st.session_state.page_number = 0
+        else:
+            st.session_state.page_number += 1
+
+    if prev.button("Previous"):
+        if st.session_state.page_number - 1 < 0:
+            st.session_state.page_number = last_page
+        else:
+            st.session_state.page_number -= 1
+
+    # Get start and end indices of the next page of the dataframe
+    start_idx = st.session_state.page_number * state.num_entries_per_page
+    end_idx = (1 + st.session_state.page_number) * state.num_entries_per_page
+
+    # Index into the sub dataframe
+    sub_df = df.iloc[start_idx:end_idx]
+
     hide_table_row_index = """
-                <style>
-                tbody th {display:none}
-                .blank {display:none}
-                </style>
-                """
+        <style>
+        tbody th {display:none}
+        .blank {display:none}
+        </style>
+        """
 
     # Inject CSS with Markdown
     st.markdown(hide_table_row_index, unsafe_allow_html=True)
-    # st.table(df)
-    st.write(df.to_html(escape=False, index=False, justify="center"), unsafe_allow_html=True)
+    st.write(sub_df.to_html(escape=False, index=False, justify="center"), unsafe_allow_html=True)
 
 
 @st.experimental_memo(show_spinner=False)
