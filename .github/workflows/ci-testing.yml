@@ -62,6 +62,7 @@ jobs:
     - name: Version Testing
       run: |
         python -c "from pytorch_lightning import __version__ as v ; print(v)"
+        pip freeze | grep "lightning"
       shell: bash
 
     - name: Tests
