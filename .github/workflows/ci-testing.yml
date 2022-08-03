@@ -54,7 +54,6 @@ jobs:
         python --version
         pip --version
         pip install --requirement requirements.txt
-        pip install --requirement requirements/extras.txt --upgrade --quiet --find-links https://download.pytorch.org/whl/cpu/torch_stable.html
         pip install --requirement tests/requirements.txt --quiet
         pip list
       shell: bash
