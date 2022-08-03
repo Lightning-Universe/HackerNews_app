@@ -61,7 +61,6 @@ jobs:
 
     - name: Version Testing
       run: |
-        python -c "import pytorch_lightning.callbacks.callback"
         python -c "from pytorch_lightning import __version__ as v ; print(v)"
       shell: bash
 
