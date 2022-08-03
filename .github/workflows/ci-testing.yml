@@ -59,6 +59,12 @@ jobs:
         pip list
       shell: bash
 
+    - name: Version Testing
+      run: |
+        python -c "import pytorch_lightning.callbacks.callback"
+        python -c "from pytorch_lightning import __version__ as v ; print(v)"
+      shell: bash
+
     - name: Tests
       run: |
         coverage run --source hackernews_app -m py.test hackernews_app tests -v --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}.xml
