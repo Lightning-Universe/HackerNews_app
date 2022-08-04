@@ -54,7 +54,7 @@ jobs:
         python --version
         pip install --upgrade pip
         pip --version
-        pip install --requirement requirements.txt
+        pip install --requirement requirements.txt --use-deprecated=legacy-resolver
         pip install --requirement tests/requirements.txt --quiet
         pip list
       shell: bash
