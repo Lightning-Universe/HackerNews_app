@@ -52,6 +52,7 @@ jobs:
     - name: Install dependencies
       run: |
         python --version
+        pip install --upgrade pip
         pip --version
         pip install --requirement requirements.txt
         pip install --requirement tests/requirements.txt --quiet
