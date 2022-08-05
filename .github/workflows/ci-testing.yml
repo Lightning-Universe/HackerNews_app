@@ -52,11 +52,17 @@ jobs:
     - name: Install dependencies
       run: |
         python --version
+        pip install --upgrade pip
         pip --version
-        pip install --requirement requirements.txt
-        pip install --requirement requirements/extras.txt --upgrade --quiet --find-links https://download.pytorch.org/whl/cpu/torch_stable.html
+        pip install --requirement requirements.txt --use-deprecated=legacy-resolver
         pip install --requirement tests/requirements.txt --quiet
         pip list
+      shell: bash
+
+    - name: Version Testing
+      run: |
+        python -c "from pytorch_lightning import __version__ as v ; print(v)"
+        pip freeze | grep "lightning"
       shell: bash
 
     - name: Tests
