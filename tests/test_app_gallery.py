@@ -197,7 +197,8 @@ def validate_app_functionalities(app_page: "Page") -> None:
     input_field.press("Enter")
 
 
-    sleep(5)
+    # Note: it usually takes anything between 5 to 7 seconds, to consider some flakyness, this is set to 10
+    sleep(10)
     stories_results = app_page.frame_locator("iframe").locator(".dataframe tr")
     assert stories_results.count() > 5
 
