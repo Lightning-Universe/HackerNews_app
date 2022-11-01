@@ -67,7 +67,7 @@ jobs:
 
     - name: Tests
       run: |
-        coverage run --source hackernews_app -m py.test hackernews_app tests -v --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}.xml
+        coverage run --source hackernews_app -m pytest hackernews_app tests -v --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}.xml
 
     - name: Statistics
       if: success()
