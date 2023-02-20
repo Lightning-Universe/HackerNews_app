@@ -9,7 +9,6 @@ from google.oauth2 import service_account
 
 
 def get_secrets():
-
     if os.getenv("LIGHTNING__GCP_CREDENTIALS"):
         try:
             return json.loads(os.getenv("LIGHTNING__GCP_CREDENTIALS"))

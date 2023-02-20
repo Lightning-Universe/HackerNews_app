@@ -42,7 +42,6 @@ TEXT_ELEMENTS = {
 
 
 def hackernews_streamlit(lightning_app_state):
-
     # Set HackerNews App page config here
     st.set_page_config(page_title="HackerNews App", page_icon="⚡️", layout="centered")
 
@@ -143,7 +142,6 @@ def recommendations_table(state: AppState):
 
 @st.experimental_memo(show_spinner=False)
 def get_user_recommendations(username: str, base_url: str):
-
     prediction = requests.post(
         f"{base_url}/api/recommend",
         headers={"X-Token": "hailhydra"},
