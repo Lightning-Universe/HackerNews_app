@@ -32,7 +32,8 @@ TEXT_ELEMENTS = {
     "text_input_placeholder": "Enter your HackerNews username (eg. AlexClay)",
     # Text for the error message when the user does not exist or does not have any favorites.
     "not_found_error_subheader": "Oops! :eyes:",
-    "not_found_error_message": "Could not find any recommendations for **{username}**. The user either does not exist or does not have any favorites.",
+    "not_found_error_message": "Could not find any recommendations for **{username}**."
+    " The user either does not exist or does not have any favorites.",
     "not_found_error_try_different_username": "Want to try a different username?",
     # Text when the user is logged in.
     "user_welcome_title": "👋 Hey {username}!",
