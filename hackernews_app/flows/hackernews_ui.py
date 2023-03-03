@@ -32,7 +32,8 @@ TEXT_ELEMENTS = {
     "text_input_placeholder": "Enter your HackerNews username (eg. AlexClay)",
     # Text for the error message when the user does not exist or does not have any favorites.
     "not_found_error_subheader": "Oops! :eyes:",
-    "not_found_error_message": "Could not find any recommendations for **{username}**. The user either does not exist or does not have any favorites.",
+    "not_found_error_message": "Could not find any recommendations for **{username}**."
+    " The user either does not exist or does not have any favorites.",
     "not_found_error_try_different_username": "Want to try a different username?",
     # Text when the user is logged in.
     "user_welcome_title": "👋 Hey {username}!",
@@ -42,7 +43,6 @@ TEXT_ELEMENTS = {
 
 
 def hackernews_streamlit(lightning_app_state):
-
     # Set HackerNews App page config here
     st.set_page_config(page_title="HackerNews App", page_icon="⚡️", layout="centered")
 
@@ -143,7 +143,6 @@ def recommendations_table(state: AppState):
 
 @st.experimental_memo(show_spinner=False)
 def get_user_recommendations(username: str, base_url: str):
-
     prediction = requests.post(
         f"{base_url}/api/recommend",
         headers={"X-Token": "hailhydra"},
